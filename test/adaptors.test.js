@@ -1,21 +1,17 @@
 var should = require('should');
 
 var lib = '../';
-var name = 'adaptors';
 
 describe('custom adaptors', function() {
-  var lg;
-  before(function(done) {
-    lg = require(lib)(name);
-    done();
-  });
   beforeEach(function(done) {
-    lg._removeAdaptors();
+    delete require.cache[require.resolve(lib)];
+    delete require.cache[require.resolve('../lib/logger')];
     done();
   });
   it('should allow custom adaptors', function(done) {
+    var lg = require(lib)('adaptors', { console: false });
     lg.use(function(module, level, message, data) {
-      module.should.equal(name);
+      module.should.equal('adaptors');
       level.should.equal('INFO');
       message.should.equal('testing');
       done();
@@ -24,10 +20,11 @@ describe('custom adaptors', function() {
   });
 
   it('should be able to filter by level', function(done) {
+    var lg = require(lib)('adaptors', { console: false });
     var logCount = 0;
     lg.use(function(module, level, message, data) {
       logCount++;
-    }, 'INFO', name);
+    }, 'INFO', 'adaptors');
     lg.info('test 1');
     lg.debug('test 2');
     logCount.should.equal(1);
@@ -35,10 +32,11 @@ describe('custom adaptors', function() {
   });
 
   it('should be able to filter multiple levels', function(done) {
+    var lg = require(lib)('adaptors', { console: false });
     var logCount = 0;
     lg.use(function(module, level, message, data) {
       logCount++;
-    }, 'INFO,ERROR', name);
+    }, 'INFO,ERROR', 'adaptors');
     lg.info('test 1');
     lg.error('test 1');
     lg.debug('test 2');
@@ -51,14 +49,14 @@ describe('custom adaptors', function() {
     lg.use(function(module, level, message, data) {
       level.should.equal('ERROR');
       done();
-    }, 'INFO', name);
+    }, 'INFO', 'adaptors');
     lg.error('test');
   });
 
   it('should not trigger lower levels', function(done) {
     lg.use(function(module, level, message, data) {
       level.should.equal('ERROR');
-    }, 'INFO', name);
+    }, 'INFO', 'adaptors');
     lg.debug('test');
     done();
   });
