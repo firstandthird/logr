@@ -5,12 +5,11 @@ var lib = '../';
 describe('custom adaptors', function() {
   beforeEach(function(done) {
     delete require.cache[require.resolve(lib)];
-    delete require.cache[require.resolve('../lib/logger')];
     done();
   });
   it('should allow custom adaptors', function(done) {
     var lg = require(lib)('adaptors', { console: false });
-    lg.use(function(module, level, message, data) {
+    lg.use(function(module, section, level, message, data) {
       module.should.equal('adaptors');
       level.should.equal('INFO');
       message.should.equal('testing');
@@ -22,7 +21,7 @@ describe('custom adaptors', function() {
   it('should be able to filter by level', function(done) {
     var lg = require(lib)('adaptors', { console: false });
     var logCount = 0;
-    lg.use(function(module, level, message, data) {
+    lg.use(function(module, section, level, message, data) {
       logCount++;
     }, 'INFO', 'adaptors');
     lg.info('test 1');
@@ -34,7 +33,7 @@ describe('custom adaptors', function() {
   it('should be able to filter multiple levels', function(done) {
     var lg = require(lib)('adaptors', { console: false });
     var logCount = 0;
-    lg.use(function(module, level, message, data) {
+    lg.use(function(module, section, level, message, data) {
       logCount++;
     }, 'INFO,ERROR', 'adaptors');
     lg.info('test 1');

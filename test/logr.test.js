@@ -9,7 +9,7 @@ describe('logr', function() {
   });
   it('should take a module name', function() {
     var lg = require(lib)('logr');
-    lg.name.should.equal('logr');
+    lg.module.should.equal('logr');
   });
 
   it('should add console adaptor by default', function() {
@@ -25,7 +25,7 @@ describe('logr', function() {
   describe('levels', function() {
     it('should log info', function(done) {
       var lg = require(lib)('logr', { console: false });
-      lg.use(function(module, level, message, data) {
+      lg.use(function(module, section, level, message, data) {
         message.should.equal('test');
         module.should.equal('logr');
         level.should.equal('INFO');
@@ -39,7 +39,7 @@ describe('logr', function() {
       var lg = require(lib)('logr', { console: false });
       var l2 = require(lib)('module2', { console: false });
       var count = 0;
-      lg.use(function(module, level, message, data) {
+      lg.use(function(module, section, level, message, data) {
         count++; 
         message.should.equal('test2');
       });
@@ -55,7 +55,7 @@ describe('logr', function() {
       var l2 = require(lib)('module2');
       lg.filter('logr');
       var count = 0;
-      lg.use(function(module, level, message, data) {
+      lg.use(function(module, section, level, message, data) {
         count++; 
         module.should.equal('logr');
       });
@@ -70,7 +70,7 @@ describe('logr', function() {
       var l3 = require(lib)('module3');
       lg.filter(['logr', 'module2']);
       var count = 0;
-      lg.use(function(module, level, message, data) {
+      lg.use(function(module, section, level, message, data) {
         count++; 
       });
       lg.info('test1');
@@ -84,7 +84,7 @@ describe('logr', function() {
       var l2 = require(lib)('module2');
       var l3 = require(lib)('module3');
       var count = 0;
-      lg.use(function(module, level, message, data) {
+      lg.use(function(module, section, level, message, data) {
         count++; 
       });
       lg.info('test1');
