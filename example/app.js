@@ -1,6 +1,6 @@
 var lg = require('../')('app');
 
-/* console is enabled by default
+/* console enabled by default
 lg.use(lg.adaptors.console({
   //color: false
 }));
