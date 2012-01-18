@@ -1,3 +1,3 @@
 test:
-	./node_modules/.bin/mocha -R list --grep Dispatcher
+	./node_modules/.bin/mocha -R list
 .PHONY: test

@@ -4,6 +4,8 @@ var Logger = require('./lib/logger');
 
 var dispatcher;
 module.exports = function(name, section, options) {
+  if (!name)
+    throw new Error('module name is required');
   if (typeof section === 'object') {
     options = section;
     section = '';

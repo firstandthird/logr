@@ -1,98 +1,61 @@
 var should = require('should');
 
-var lib = '../';
+
+var Logger = require('../lib/logger');
 
 describe('logr', function() {
-  beforeEach(function(start) {
+
+  var logr;
+  beforeEach(function() {
+    var lib = '../';
     delete require.cache[require.resolve(lib)];
-    start();
+    logr = require(lib);
+
   });
-  it('should take a module name', function() {
-    var lg = require(lib)('logr');
-    lg.module.should.equal('logr');
+  it('should require module name', function() {
+    (function() {
+      logr();
+    }).should.throw();
   });
 
-  it('should add console adaptor by default', function() {
-    var lg = require(lib)('logr');
-    lg.core.emitter.listenerTree.logr.should.be.ok;
+  it('should return logger', function() {
+    var l = logr('module');
+    l.should.be.instanceof(Logger);
   });
 
-  it('should disable console through options', function() {
-    var lg = require(lib)('logr', { console: false });
-    should.not.exist(lg.core.emitter.listenerTree.logr);
+  it('should take name and section and pass to logger instance', function() {
+    var l = logr('module', 'section');
+    l.module.should.equal('module');
+    l.section.should.equal('section');
   });
 
-  describe('levels', function() {
-    it('should log info', function(done) {
-      var lg = require(lib)('logr', { console: false });
-      lg.use(function(module, section, level, message, data) {
-        message.should.equal('test');
-        module.should.equal('logr');
-        level.should.equal('INFO');
-        done();
-      });
-      lg.info('test');
-    });
+  it('should only create one instance of dispatcher', function() {
+    var l1 = logr('module1');
+    var l2 = logr('module2');
+    l1.dispatcher.should.equal(l2.dispatcher);
   });
-  describe('multiple modules', function() {
-    it('should log all modules that have been defined', function(done) {
-      var lg = require(lib)('logr', { console: false });
-      var l2 = require(lib)('module2', { console: false });
-      var count = 0;
-      lg.use(function(module, section, level, message, data) {
-        count++; 
-        message.should.equal('test2');
-      });
-      lg.info('test2');
-      l2.info('test2');
-      count.should.equal(2);
-      done();
+
+  it('should optionally take section', function() {
+    var l = logr('module1', {
+      levels: ['TEST1', 'TEST2']
     });
+    should.equal(l.section, '');
+    l.options.levels.length.should.equal(2);
   });
-  describe('filter', function() {
-    it('should only log selected modules when filter applied', function(done) {
-      var lg = require(lib)('logr', { console: false });
-      var l2 = require(lib)('module2');
-      lg.filter('logr');
-      var count = 0;
-      lg.use(function(module, section, level, message, data) {
-        count++; 
-        module.should.equal('logr');
-      });
-      lg.info('test1');
-      l2.info('test2');
-      count.should.equal(1);
-      done();
+
+  it('should pass options to dispatcher and logger', function() {
+    var l = logr('module1', {
+      levels: ['TEST1', 'TEST2'],
+      console: false,
+      filter: ['module1']
     });
-    it('should take multiple modules as filters', function(done) {
-      var lg = require(lib)('logr', { console: false });
-      var l2 = require(lib)('module2');
-      var l3 = require(lib)('module3');
-      lg.filter(['logr', 'module2']);
-      var count = 0;
-      lg.use(function(module, section, level, message, data) {
-        count++; 
-      });
-      lg.info('test1');
-      l2.info('test2');
-      l3.info('test3');
-      count.should.equal(2);
-      done();
-    });
-    it('should take filters as options', function(done) {
-      var lg = require(lib)('logr', { console: false, filter: 'logr' });
-      var l2 = require(lib)('module2');
-      var l3 = require(lib)('module3');
-      var count = 0;
-      lg.use(function(module, section, level, message, data) {
-        count++; 
-      });
-      lg.info('test1');
-      l2.info('test2');
-      l3.info('test3');
-      count.should.equal(1);
-      done();
-    });
-    //it('should take submodules with their parent');
+    l.options.levels.length.should.equal(2);
+    l.dispatcher.options.console.should.be.false;
+    l.dispatcher.filters.should.include('module1');
+  });
+
+  it('should add to dispatcher loggers', function() {
+    var l1 = logr('module1');
+    l1.dispatcher.loggers.should.include(l1);
   });
 });
