@@ -7,7 +7,7 @@ lg.use(lg.adaptors.console({
 */
 
 //custom adaptor for error levels (could be email or some sort of push notification)
-lg.use(function(module, level, message, data) {
+lg.use(function(module, section, level, message, data) {
   console.error('FIX THIS NOW: ' + message);
 }, 'ERROR');
 
