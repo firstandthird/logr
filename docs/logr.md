@@ -2,7 +2,7 @@
 
 [logr](https://github.com/jgallen23/logr) is a lightweight, but extensible, logging and debugging library for node.js.	The main difference between logr and most of the other logging libraries is that you can pass in a module name and section name to easily view and filter your logs.
 
-![logr](https://raw.github.com/jgallen23/logr/gh-pages/ui/logr1.png)
+![logr](https://raw.github.com/jgallen23/logr/raw/gh-pages/ui/logr1.png)
 
 ##Installation
 
@@ -26,7 +26,7 @@ model.js
 
 output:
 
-![logr](https://raw.github.com/jgallen23/logr/gh-pages/ui/logr1.png)
+![logr](https://raw.github.com/jgallen23/logr/raw/gh-pages/ui/logr1.png)
 
 ###Default Log Levels
 
@@ -95,7 +95,7 @@ Here's an example:
 
 This will fire on all lg.error calls in the app module
 
-![logr](https://raw.github.com/jgallen23/logr/gh-pages/ui/logr2.png)
+![logr](https://raw.github.com/jgallen23/logr/raw/gh-pages/ui/logr2.png)
 
 ###Filtering
 
