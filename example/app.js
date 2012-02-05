@@ -1,12 +1,12 @@
 var lg = require('../')('app');
 
 /* console enabled by default
-lg.use(lg.adaptors.console({
+lg.use(lg.adapters.console({
   //color: false
 }));
 */
 
-//custom adaptor for error levels (could be email or some sort of push notification)
+//custom adapter for error levels (could be email or some sort of push notification)
 lg.use(function(module, section, level, message, data) {
   console.error('FIX THIS NOW: ' + message);
 }, 'ERROR');

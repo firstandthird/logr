@@ -16,7 +16,8 @@
   },
   "devDependencies": {
 		"mocha": "*",
-    "should": "*"
+    "should": "*",
+    "markx": "*"
   },
   "keywords": ["log", "debug", "logger"]
 }

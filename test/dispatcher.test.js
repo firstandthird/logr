@@ -23,7 +23,7 @@ describe('Dispatcher', function() {
       d.options.filter.should.equal('test');
     });
 
-    it('should use console adaptor by default', function() {
+    it('should use console adapter by default', function() {
       var d = new Dispatcher();
       should.exist(d.emitter.listenerTree.logr);
     });
@@ -50,17 +50,17 @@ describe('Dispatcher', function() {
     });
   });
 
-  describe('#useAdaptor', function() {
+  describe('#useAdapter', function() {
     it('should bind to emitter', function() {
       var d = new Dispatcher({ console: false });
-      d.useAdaptor(function(module, section, message, data) { });
+      d.useAdapter(function(module, section, message, data) { });
       should.exist(d.emitter.listenerTree.logr);
     });
 
     it('should default to all levels', function() {
       var d = new Dispatcher({ console: false });
       var f = function(module, section, message, data) { };
-      d.useAdaptor(f);
+      d.useAdapter(f);
       should.exist(d.emitter.listenerTree.logr['*']['*']['*']);
       d.emitter.listenerTree.logr['*']['*']['*']._listeners.should.equal(f);
     });
@@ -68,7 +68,7 @@ describe('Dispatcher', function() {
     it('should allow level to filter', function() {
       var d = new Dispatcher({ console: false });
       var f = function(module, section, message, data) { };
-      d.useAdaptor(f, 'INFO');
+      d.useAdapter(f, 'INFO');
       d.emitter.listenerTree.logr['*']['*'].INFO._listeners.should.equal(f);
       should.exist(d.emitter.listenerTree.logr['*']['*'].INFO);
     });
@@ -76,7 +76,7 @@ describe('Dispatcher', function() {
     it('should allow multiple levels to filter', function() {
       var d = new Dispatcher({ console: false });
       var f = function(module, section, message, data) { };
-      d.useAdaptor(f, ['INFO', 'ERROR']);
+      d.useAdapter(f, ['INFO', 'ERROR']);
       should.exist(d.emitter.listenerTree.logr['*']['*'].INFO);
       should.exist(d.emitter.listenerTree.logr['*']['*'].ERROR);
       d.emitter.listenerTree.logr['*']['*'].INFO._listeners.should.equal(f);
@@ -86,7 +86,7 @@ describe('Dispatcher', function() {
     it('should allow module and section filtering', function() {
       var d = new Dispatcher({ console: false });
       var f = function(module, section, message, data) { };
-      d.useAdaptor(f, 'INFO', 'module', 'section');
+      d.useAdapter(f, 'INFO', 'module', 'section');
       should.exist(d.emitter.listenerTree.logr.module.section.INFO);
       d.emitter.listenerTree.logr.module.section.INFO._listeners.should.equal(f);
     });
@@ -110,7 +110,7 @@ describe('Dispatcher', function() {
   describe('#emit', function() {
     it('should trigger event', function(done) {
       var d = new Dispatcher({ console: false });
-      d.useAdaptor(function(module, section, level, message, data) {
+      d.useAdapter(function(module, section, level, message, data) {
         module.should.equal('module');
         section.should.equal('section'); 
         level.should.equal('INFO');
@@ -124,7 +124,7 @@ describe('Dispatcher', function() {
     it('should not trigger a filtered event', function() {
       var d = new Dispatcher({ console: false });
       var eventCount = 0;
-      d.useAdaptor(function(module, section, level, message, data) {
+      d.useAdapter(function(module, section, level, message, data) {
         module.should.equal('module');
         eventCount++;
       });
@@ -136,11 +136,11 @@ describe('Dispatcher', function() {
   });
 
   /*TODO
-  describe('#removeAdaptors', function() {
+  describe('#removeAdapters', function() {
     it('should unbind all events', function() {
       var d = new Dispatcher();
       should.exist(d.emitter.listenerTree.logr);
-      d.removeAdaptors();
+      d.removeadapters();
       should.not.exist(d.emitter.listenerTree.logr);
     });
   });

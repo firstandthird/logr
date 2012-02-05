@@ -1,8 +1,8 @@
 #Logr
 
-[logr](https://github.com/jgallen23/logr) is a lightweight, but extensible, logging and debugging library for node.js.	The main difference between logr and most of the other logging libraries is that you can pass in a module name and section name to easily view and filter your logs by module.
+[logr](https://github.com/jgallen23/logr) is a lightweight, but extensible, logging and debugging library for node.js.	The main difference between logr and most of the other logging libraries is that you can pass in a module name and section name to easily view and filter your logs.
 
-![logr](https://raw.github.com/jgallen23/logr/master/docs/assets/logr1.png)
+![logr](https://raw.github.com/jgallen23/logr/gh-pages/ui/logr1.png)
 
 ##Installation
 
@@ -26,7 +26,7 @@ model.js
 
 output:
 
-![logr](https://raw.github.com/jgallen23/logr/master/docs/assets/logr1.png)
+![logr](https://raw.github.com/jgallen23/logr/gh-pages/ui/logr1.png)
 
 ###Default Log Levels
 
@@ -42,23 +42,23 @@ output:
 
 Based on the log levels, you can call lg.notice or lg.warn, etc.
 
-##Adaptors
+##Adapters
 
 ###Console
 
-By default the console adaptor is enabled, but if you want more control over the output you can do something like this:
+By default the console adapter is enabled, but if you want more control over the output you can do something like this:
 
 	var lg = require('logr')('app', { console: false });
 
-	//this will use the console adaptor for only INFO level logs
-	lg.use(lg.adaptors.console({
+	//this will use the console adapter for only INFO level logs
+	lg.use(lg.adapters.console({
 		color: false,
 		timestamp: false
 	}, 'INFO');
 
 ###Future
 
-Currently, only the console adaptor is build into the core library, but more adaptors are coming soon:
+Currently, only the console adapter is build into the core library, but more adapters are coming soon:
 
 - Mail
 - Boxcar
@@ -71,7 +71,7 @@ Currently, only the console adaptor is build into the core library, but more ada
 In your root app file you can pass some options on to logr.	Currently here are the options that you can pass when you first initialize logr
 
 	var lg = require('logr')('app', {
-		console: false, //disables console adaptor (global for all instances)
+		console: false, //disables console adapter (global for all instances)
 		filter: ['app', 'module1'], //will only log those modules (global for all instances)
 		levels: [ //can define custom levels (specific to this instance of lg)
 			'TEST1',
@@ -79,9 +79,9 @@ In your root app file you can pass some options on to logr.	Currently here are t
 		]
 	});
 
-###Custom Adaptors
+###Custom adapters
 
-Creating a custom adaptor is very easy.	
+Creating a custom adapter is very easy.	
 	
 	var lg = require('logr')('app');
 
@@ -95,7 +95,7 @@ Here's an example:
 
 This will fire on all lg.error calls in the app module
 
-![logr](https://raw.github.com/jgallen23/logr/master/docs/assets/logr2.png)
+![logr](https://raw.github.com/jgallen23/logr/gh-pages/ui/logr2.png)
 
 ###Filtering
 
@@ -104,7 +104,7 @@ Logr lets you apply module filters across all instances, so that you can easily 
 	var lg = require('logr')('app');
 	lg.filter(['app', 'module1']);
 
-Now only app and module1 log calls will passed on to your adaptors.	This is great for debugging a specific module without distraction from other log calls.
+Now only app and module1 log calls will passed on to your adapters.	This is great for debugging a specific module without distraction from other log calls.
 
 ###Filtering with enviornment variables 
 
@@ -115,9 +115,9 @@ In addition to the filter call, you can also use enviornment vars like so:
 This is the same as doing lg.filter('app') in your code.
 
 ##Future
-- More adaptors
+- More adapters
 - Colored levels 
-- Easy way to pass options to default console adaptor
+- Easy way to pass options to default console adapter
 
 ##Authors
 - Greg Allen ([@jgaui](http://twitter.com/jgaui)) [jga.me](http://jga.me)
