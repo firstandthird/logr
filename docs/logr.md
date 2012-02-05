@@ -3,7 +3,6 @@
 [logr](https://github.com/jgallen23/logr) is a lightweight, but extensible, logging and debugging library for node.js.	The main difference between logr and most of the other logging libraries is that you can pass in a module name and section name to easily view and filter your logs by module.
 
 ![logr](https://raw.github.com/jgallen23/logr/master/docs/assets/logr1.png)
-(screenshot)
 
 ##Installation
 
@@ -119,3 +118,6 @@ This is the same as doing lg.filter('app') in your code.
 - More adaptors
 - Colored levels 
 - Easy way to pass options to default console adaptor
+
+##Authors
+- Greg Allen ([@jgaui](http://twitter.com/jgaui)) [jga.me](http://jga.me)
