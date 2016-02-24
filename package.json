@@ -2,22 +2,14 @@
   "name": "logr",
   "description": "a simple logger/debugger",
   "version": "0.0.2",
-  "homepage": "https://github.com/jgallen23/logr",
-  "author": "Greg Allen <@jgaui> (http://jga.me)",
+  "homepage": "https://github.com/firstandthird/logr",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jgallen23/logr.git"
+    "url": "https://github.com/firstandthird/logr.git"
   },
   "dependencies": {
-    "aug": "0.0.2",
-    "colors": "0.6.0-1",
-    "eventemitter2": "0.4.3",
-    "strf": "0.0.2"
   },
   "devDependencies": {
-		"mocha": "*",
-    "should": "*",
-    "markx": "*"
   },
   "keywords": ["log", "debug", "logger"]
 }
