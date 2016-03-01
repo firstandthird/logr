@@ -67,6 +67,48 @@ describe('logr', () => {
       log(['tag1'], { message: 'hi there' });
       expect(lastMessage).to.equal('[tag1] {\n  "message": "hi there"\n}');
     });
+
+    it('should color tags', () => {
+      const log = new Logr({
+        renderOptions: {
+          console: {
+            timestamp: false,
+            pretty: true,
+            colors: {
+              tag1: 'red'
+            }
+          }
+        }
+      });
+      log(['tag1'], 'message');
+      expect(lastMessage).to.equal('[\u001b[31mtag1\u001b[0m] message');
+    });
+    it('should default color error, warn, notice', () => {
+      const log = new Logr({
+        renderOptions: {
+          console: {
+            timestamp: false,
+            pretty: true
+          }
+        }
+      });
+      log(['error', 'warn', 'notice'], 'message');
+      expect(lastMessage).to.equal('[\u001b[31merror\u001b[0m,\u001b[33mwarn\u001b[0m,\u001b[34mnotice\u001b[0m] message');
+    });
+
+    it('should allow to disable colors', () => {
+      const log = new Logr({
+        renderOptions: {
+          console: {
+            timestamp: false,
+            pretty: true,
+            colors: false
+          }
+        }
+      });
+      log(['error', 'warn', 'notice'], 'message');
+      expect(lastMessage).to.equal('[error,warn,notice] message');
+    });
   });
 
   describe('json', () => {

@@ -7,7 +7,12 @@ const defaults = {
   renderOptions: {
     console: {
       timestamp: true,
-      pretty: false
+      pretty: false,
+      colors: {
+        error: 'red',
+        warn: 'yellow',
+        notice: 'blue'
+      }
     },
     json: {
       tagsObject: false,
