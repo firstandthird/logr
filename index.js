@@ -6,7 +6,8 @@ const defaults = {
   filter: null,
   renderOptions: {
     console: {
-      timestamp: true
+      timestamp: true,
+      pretty: false
     },
     json: {
       tagsObject: false,

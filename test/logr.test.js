@@ -39,6 +39,13 @@ describe('logr', () => {
       log(['tag1', 'tag2'], 'message');
       expect(lastMessage).to.equal('[tag1,tag2] message');
     });
+
+    it('should stringify json', () => {
+      const log = new Logr({ renderOptions: { console: { timestamp: false } } });
+      log(['tag1'], { message: 'hi there' });
+      expect(lastMessage).to.equal('[tag1] {"message":"hi there"}');
+    });
+
     it('should stringify json in a safe way', () => {
       const circularObj = {};
       circularObj.circularRef = circularObj;
@@ -46,6 +53,19 @@ describe('logr', () => {
       const log = new Logr({ renderOptions: { console: { timestamp: false } } });
       log(['tag1'], circularObj);
       expect(lastMessage).to.equal('[tag1] {"circularRef":"[Circular ~]","list":["[Circular ~]","[Circular ~]"]}');
+    });
+
+    it('should allow pretty printing json', () => {
+      const log = new Logr({
+        renderOptions: {
+          console: {
+            timestamp: false,
+            pretty: true
+          }
+        }
+      });
+      log(['tag1'], { message: 'hi there' });
+      expect(lastMessage).to.equal('[tag1] {\n  "message": "hi there"\n}');
     });
   });
 
