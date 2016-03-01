@@ -3,12 +3,15 @@
 const aug = require('aug');
 const defaults = {
   type: 'console',
-  timestamp: true,
   filter: null,
-  jsonOptions: {
-    tagsObject: false,
-    additional: {},
-    pretty: false
+  renderOptions: {
+    console: {
+      timestamp: true
+    },
+    json: {
+      tagsObject: false,
+      additional: {}
+    }
   }
 };
 
@@ -24,6 +27,7 @@ class Logger {
     if (this.config.type && !this.renderers[this.config.type]) {
       throw new Error('invalid type');
     }
+    this.renderOptions = this.config.renderOptions[this.config.type];
 
     return this.log.bind(this);
   }
@@ -42,7 +46,7 @@ class Logger {
       return;
     }
 
-    const out = this.renderers[this.config.type](this.config, tags, message);
+    const out = this.renderers[this.config.type](this.renderOptions, tags, message);
     /*eslint-disable no-console*/
     console.log(out);
     /*eslint-enable no-console*/

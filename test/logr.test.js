@@ -30,7 +30,11 @@ describe('logr', () => {
     });
     it('should allow disable timestamp', () => {
       const log = new Logr({
-        timestamp: false
+        renderOptions: {
+          console: {
+            timestamp: false
+          }
+        }
       });
       log(['tag1', 'tag2'], 'message');
       expect(lastMessage).to.equal('[tag1,tag2] message');
@@ -39,7 +43,7 @@ describe('logr', () => {
       const circularObj = {};
       circularObj.circularRef = circularObj;
       circularObj.list = [circularObj, circularObj];
-      const log = new Logr({ timestamp: false });
+      const log = new Logr({ renderOptions: { console: { timestamp: false } } });
       log(['tag1'], circularObj);
       expect(lastMessage).to.equal('[tag1] {"circularRef":"[Circular ~]","list":["[Circular ~]","[Circular ~]"]}');
     });
@@ -58,8 +62,10 @@ describe('logr', () => {
     it('should output tags as objects if config set', () => {
       const log = new Logr({
         type: 'json',
-        jsonOptions: {
-          tagsObject: true
+        renderOptions: {
+          json: {
+            tagsObject: true
+          }
         }
       });
       log(['tag1', 'tag2'], 'message');
@@ -72,9 +78,11 @@ describe('logr', () => {
     it('should allow additional data to be logged', () => {
       const log = new Logr({
         type: 'json',
-        jsonOptions: {
-          additional: {
-            host: 'blah.com'
+        renderOptions: {
+          json: {
+            additional: {
+              host: 'blah.com'
+            }
           }
         }
       });
@@ -97,7 +105,7 @@ describe('logr', () => {
 
   describe('filter', () => {
     it('should filter based on tags', () => {
-      const log = new Logr({ filter: ['tag1'], timestamp: false });
+      const log = new Logr({ filter: ['tag1'], renderOptions: { console: { timestamp: false } } });
       log(['tag1'], 'message1');
       expect(lastMessage).to.equal('[tag1] message1');
       log(['tag2'], 'message2');
