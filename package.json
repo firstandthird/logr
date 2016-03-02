@@ -12,8 +12,8 @@
     "test": "mocha -u bdd test/logr.test.js"
   },
   "dependencies": {
-    "aug": "^0.1.0",
-    "json-stringify-safe": "^5.0.1"
+    "json-stringify-safe": "^5.0.1",
+    "lodash": "^4.5.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",

@@ -1,6 +1,6 @@
 'use strict';
 
-const aug = require('aug');
+const _ = require('lodash');
 const defaults = {
   type: 'console',
   filter: null,
@@ -23,7 +23,7 @@ const defaults = {
 
 class Logger {
   constructor(options) {
-    this.config = aug({}, defaults, options);
+    this.config = _.defaultsDeep(options, defaults);
 
     this.renderers = {
       console: require('./lib/console'),
