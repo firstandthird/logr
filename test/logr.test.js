@@ -68,6 +68,19 @@ describe('logr', () => {
       expect(lastMessage).to.equal('[tag1] {\n  "message": "hi there"\n}');
     });
 
+    it('should replace escaped newlines if pretty', () => {
+      const log = new Logr({
+        renderOptions: {
+          console: {
+            timestamp: false,
+            pretty: true
+          }
+        }
+      });
+      log(['tag1'], { message: 'hi\nthere' });
+      expect(lastMessage).to.equal('[tag1] {\n  "message": "hi\nthere"\n}');
+    });
+
     it('should color tags', () => {
       const log = new Logr({
         renderOptions: {
