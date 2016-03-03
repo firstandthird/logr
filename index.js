@@ -4,6 +4,7 @@ const _ = require('lodash');
 const defaults = {
   type: 'console',
   filter: null,
+  defaultTags: [],
   renderOptions: {
     console: {
       timestamp: true,
@@ -51,6 +52,8 @@ class Logger {
     if (!this.filterMatch(this.config.filter, tags)) {
       return;
     }
+
+    tags = this.config.defaultTags.concat(tags);
 
     const out = this.renderers[this.config.type](this.renderOptions, tags, message);
     /*eslint-disable no-console*/

@@ -122,6 +122,19 @@ describe('logr', () => {
       log(['error', 'warn', 'notice'], 'message');
       expect(lastMessage).to.equal('[error,warn,notice] message');
     });
+
+    it('should allow default tags to be set', () => {
+      const log = new Logr({
+        defaultTags: ['default'],
+        renderOptions: {
+          console: {
+            timestamp: false
+          }
+        }
+      });
+      log(['tag1'], 'test');
+      expect(lastMessage).to.equal('[default,tag1] test');
+    });
   });
 
   describe('json', () => {
