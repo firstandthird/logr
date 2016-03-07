@@ -1,5 +1,10 @@
 
-1.3.n / 2016-03-03
+1.4.0 / 2016-03-06
+==================
+
+  * added transform for browserify
+
+1.3.0 / 2016-03-03
 ==================
 
   * allow defaultTags to be set for all logs
