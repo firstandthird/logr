@@ -27,5 +27,8 @@
     "log",
     "debug",
     "logger"
-  ]
+  ],
+  "browserify": {
+    "transform": [["babelify", { "presets": ["es2015"] }]]
+  }
 }
