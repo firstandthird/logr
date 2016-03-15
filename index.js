@@ -35,6 +35,10 @@ class Logger {
       this.config.type = process.env.LOGR_TYPE;
     }
 
+    if (process.env.LOGR_FILTER) {
+      this.config.filter = process.env.LOGR_FILTER.split(',');
+    }
+
     if (this.config.type && !this.renderers[this.config.type]) {
       throw new Error('invalid type');
     }

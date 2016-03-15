@@ -199,6 +199,16 @@ describe('logr', () => {
       expect(lastMessage[0]).to.equal('{');
       delete process.env.LOGR_TYPE;
     });
+
+    it('should look at LOGR_FILTER to override filters', () => {
+      process.env.LOGR_FILTER = 'tag1,tag2';
+      const log = new Logr({ type: 'console', renderOptions: { console: { timestamp: false } } });
+      log(['tag1'], 'message1');
+      expect(lastMessage).to.equal('[tag1] message1');
+      log(['tag3'], 'message1');
+      expect(lastMessage).to.equal('[tag1] message1');
+      delete process.env.LOGR_FILTER;
+    });
   });
 
   describe('filter', () => {
