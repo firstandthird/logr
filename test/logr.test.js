@@ -191,6 +191,16 @@ describe('logr', () => {
     });
   });
 
+  describe('env overrides', () => {
+    it('should look at LOGR_TYPE to override type', () => {
+      process.env.LOGR_TYPE = 'json';
+      const log = new Logr({ type: 'console' });
+      log(['tag1'], 'message1');
+      expect(lastMessage[0]).to.equal('{');
+      delete process.env.LOGR_TYPE;
+    });
+  });
+
   describe('filter', () => {
     it('should filter based on tags', () => {
       const log = new Logr({ filter: ['tag1'], renderOptions: { console: { timestamp: false } } });

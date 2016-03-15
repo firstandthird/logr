@@ -31,6 +31,10 @@ class Logger {
       json: require('./lib/json')
     };
 
+    if (process.env.LOGR_TYPE) {
+      this.config.type = process.env.LOGR_TYPE;
+    }
+
     if (this.config.type && !this.renderers[this.config.type]) {
       throw new Error('invalid type');
     }
