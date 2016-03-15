@@ -22,6 +22,15 @@ describe('logr', () => {
     });
   });
 
+  describe('no type', () => {
+    it('should not output', () => {
+      const oldMessage = lastMessage;
+      const log = new Logr({ type: false });
+      log(['tag1', 'tag2'], 'this should not output');
+      expect(lastMessage).to.equal(oldMessage);
+    });
+  });
+
   describe('console', () => {
     it('should output to console formatted', () => {
       const log = new Logr();

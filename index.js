@@ -31,6 +31,10 @@ class Logger {
       json: require('./lib/json')
     };
 
+    if (options && options.type === false) {
+      this.config.type = false;
+    }
+
     if (process.env.LOGR_TYPE) {
       this.config.type = process.env.LOGR_TYPE;
     }
@@ -57,6 +61,10 @@ class Logger {
   }
 
   log(tags, message) {
+    if (!this.config.type) {
+      return;
+    }
+
     if (!this.filterMatch(this.config.filter, tags)) {
       return;
     }
