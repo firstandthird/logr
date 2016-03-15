@@ -37,6 +37,10 @@ class Logger {
 
     if (process.env.LOGR_TYPE) {
       this.config.type = process.env.LOGR_TYPE;
+      //env vars come in as strings
+      if (this.config.type === 'false') {
+        this.config.type = false;
+      }
     }
 
     if (process.env.LOGR_FILTER) {

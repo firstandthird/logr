@@ -209,6 +209,15 @@ describe('logr', () => {
       delete process.env.LOGR_TYPE;
     });
 
+    it('should LOGR_TYPE=false should disable output', () => {
+      const oldMessage = lastMessage;
+      process.env.LOGR_TYPE = 'false';
+      const log = new Logr();
+      log(['tag1'], 'this should not output');
+      expect(lastMessage).to.equal(oldMessage);
+      delete process.env.LOGR_TYPE;
+    });
+
     it('should look at LOGR_FILTER to override filters', () => {
       process.env.LOGR_FILTER = 'tag1,tag2';
       const log = new Logr({ type: 'console', renderOptions: { console: { timestamp: false } } });
