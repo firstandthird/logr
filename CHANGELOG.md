@@ -1,4 +1,12 @@
 
+1.6.0 / 2016-03-14
+==================
+
+  * support LOGR_TYPE=false in env var
+  * if type: false, don't output
+  * added support for overriding filters with LOGR_FILTER env var
+  * added ability to override type with LOGR_TYPE env var
+
 1.5.0 / 2016-03-06
 ==================
 
