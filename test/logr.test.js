@@ -45,7 +45,7 @@ describe('logr', () => {
           }
         }
       });
-      log( ['tag1', 'tag2'], 'message with a ding added');
+      log( ['tag1', 'tag2', 'ding'], 'message with a ding added');
       expect(lastMessage).to.contain('\u0007');
     });
 
