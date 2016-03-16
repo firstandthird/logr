@@ -37,11 +37,11 @@ describe('logr', () => {
       log(['tag1', 'tag2'], 'message');
       expect(lastMessage).to.contain('[tag1,tag2] message');
     });
-    it('should output to console formatted with a ding', () => {
+    it('allows you to specify a tag to trigger a ding', () => {
       const log = new Logr({
         renderOptions: {
           console: {
-            consoleBell: true
+            consoleBell : ['error', 'ding']
           }
         }
       });
@@ -127,7 +127,7 @@ describe('logr', () => {
         }
       });
       log(['error', 'warn', 'notice'], 'message');
-      expect(lastMessage).to.equal('[\u001b[31merror\u001b[0m,\u001b[33mwarn\u001b[0m,\u001b[34mnotice\u001b[0m] message');
+      expect(lastMessage).to.equal('[\u001b[31merror\u001b[0m,\u001b[33mwarn\u001b[0m,\u001b[34mnotice\u001b[0m] message\u0007');
     });
 
     it('should allow to disable colors', () => {
@@ -141,7 +141,7 @@ describe('logr', () => {
         }
       });
       log(['error', 'warn', 'notice'], 'message');
-      expect(lastMessage).to.equal('[error,warn,notice] message');
+      expect(lastMessage).to.equal('[error,warn,notice] message\u0007');
     });
 
     it('should allow default tags to be set', () => {
