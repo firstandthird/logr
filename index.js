@@ -7,6 +7,7 @@ const defaults = {
   defaultTags: [],
   renderOptions: {
     console: {
+      consoleBell: false,
       timestamp: true,
       pretty: false,
       colors: {

@@ -37,6 +37,18 @@ describe('logr', () => {
       log(['tag1', 'tag2'], 'message');
       expect(lastMessage).to.contain('[tag1,tag2] message');
     });
+    it('should output to console formatted with a ding', () => {
+      const log = new Logr({
+        renderOptions: {
+          console: {
+            consoleBell: true
+          }
+        }
+      });
+      log( ['tag1', 'tag2'], 'message with a ding added');
+      expect(lastMessage).to.contain('\u0007');
+    });
+
     it('should allow disable timestamp', () => {
       const log = new Logr({
         renderOptions: {
