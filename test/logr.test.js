@@ -48,7 +48,28 @@ describe('logr', () => {
       log( ['tag1', 'tag2', 'ding'], 'message with a ding added');
       expect(lastMessage).to.contain('\u0007');
     });
-
+    it('will not ding if you do not use the tags', () => {
+      const log = new Logr({
+        renderOptions: {
+          console: {
+            consoleBell : ['error', 'ding']
+          }
+        }
+      });
+      log( ['tag1', 'tag2', ], 'message with no  ding added');
+      expect(lastMessage).to.not.contain('\u0007');
+    });
+    it('allows you to disable all dings', () => {
+      const log = new Logr({
+        renderOptions: {
+          console: {
+            consoleBell : false
+          }
+        }
+      });
+      log( ['tag1', 'tag2', 'error'], 'message with a ding added');
+      expect(lastMessage).to.not.contain('\u0007');
+    });
     it('should allow disable timestamp', () => {
       const log = new Logr({
         renderOptions: {
