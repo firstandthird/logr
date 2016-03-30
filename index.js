@@ -65,6 +65,10 @@ class Logger {
   }
 
   log(tags, message) {
+    if (arguments.length === 1) {
+        message = tags;
+        tags = [];
+    }
     if (!this.config.type) {
       return;
     }
