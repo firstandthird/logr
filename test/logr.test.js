@@ -144,7 +144,20 @@ describe('logr', () => {
       log(['tag1'], 'test');
       expect(lastMessage).to.equal('[default,tag1] test');
     });
-    
+    it('should let you optionally leave out the tags ', () => {
+      const log = new Logr({
+        defaultTags: ['default'],
+        renderOptions: {
+          console: {
+            timestamp: false
+          }
+        }
+      });
+      log('test');
+      expect(lastMessage).to.equal('[default] test');
+      log({ test: 123 });
+      expect(lastMessage).to.equal('[default] {"test":123}');
+    });
   });
 
   describe('json', () => {
