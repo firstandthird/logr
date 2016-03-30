@@ -158,6 +158,19 @@ describe('logr', () => {
       log({ test: 123 });
       expect(lastMessage).to.equal('[default] {"test":123}');
     });
+    it('should let you have no tags at all ', () => {
+      const log = new Logr({
+        renderOptions: {
+          console: {
+            timestamp: false
+          }
+        }
+      });
+      log('test');
+      expect(lastMessage).to.equal('test');
+      log({ test: 123 });
+      expect(lastMessage).to.equal('{"test":123}');
+    });
   });
 
   describe('json', () => {
