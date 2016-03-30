@@ -144,17 +144,7 @@ describe('logr', () => {
       log(['tag1'], 'test');
       expect(lastMessage).to.equal('[default,tag1] test');
     });
-    it('will not ding if you do not use the tags', () => {
-      const log = new Logr({
-        renderOptions: {
-          console: {
-            consoleBell : ['error', 'ding']
-          }
-        }
-      });
-      log( ['tag1', 'tag2', ], 'message with no  ding added');
-      expect(lastMessage).to.not.contain('\u0007');
-    });
+    
   });
 
   describe('json', () => {
