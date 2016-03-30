@@ -103,7 +103,7 @@ describe('logr', () => {
         }
       });
       log(['tag1'], 'message');
-      expect(lastMessage).to.equal('[\u001b[41mtag1\u001b[0m] message');
+      expect(lastMessage).to.equal('[\u001b[31mtag1\u001b[0m] message');
     });
     it('should default color error, warn, notice', () => {
       const log = new Logr({
