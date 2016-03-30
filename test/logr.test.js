@@ -179,6 +179,40 @@ describe('logr', () => {
     });
   });
 
+
+  describe('cli', () => {
+    it('should print correctly (indented, no timestamp, tags last)', () => {
+      const log = new Logr({
+        type: 'cli',
+        renderOptions: {
+          cli: {
+            colors: {
+              tag1: 'red'
+            }
+          }
+        }
+      });
+      log(['tag1'], 'message');
+      expect(lastMessage).to.equal('  message (\u001b[41mtag1\u001b[0m)');
+    });
+    it('should take in an optional color to color the whole line)', () => {
+      const log = new Logr({
+        type: 'cli',
+        renderOptions: {
+          cli: {
+            lineColor: 'green',
+            colors: {
+              tag1: 'red'
+            }
+          }
+        }
+      });
+      log(['tag1'], 'message');
+      expect(lastMessage).to.equal('\x1b[42m  message (\u001b[41mtag1\u001b[0m)');
+    });
+  });
+
+
   describe('json', () => {
     it('should output to json formatted', () => {
       const log = new Logr({ type: 'json' });

@@ -29,7 +29,8 @@ class Logger {
 
     this.renderers = {
       console: require('./lib/console'),
-      json: require('./lib/json')
+      json: require('./lib/json'),
+      cli: require('./lib/cli'),
     };
 
     if (options && options.type === false) {
