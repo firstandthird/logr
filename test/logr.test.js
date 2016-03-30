@@ -208,7 +208,7 @@ describe('logr', () => {
         }
       });
       log(['tag1'], 'message');
-      expect(lastMessage).to.equal('\x1b[42m  message (\u001b[31mtag1\u001b[0m)');
+      expect(lastMessage).to.equal('\x1b[42m  message\x1b[0m (\u001b[31mtag1\u001b[0m)');
     });
   });
 
