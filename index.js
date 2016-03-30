@@ -7,6 +7,7 @@ const defaults = {
   defaultTags: [],
   renderOptions: {
     console: {
+      consoleBell: ['error'],
       timestamp: true,
       pretty: false,
       colors: {
