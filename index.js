@@ -11,9 +11,9 @@ const defaults = {
       timestamp: true,
       pretty: false,
       colors: {
-        error: 'red',
-        warn: 'yellow',
-        notice: 'blue'
+        error: 'bgRed',
+        warn: 'bgYellow',
+        notice: 'bgBlue'
       }
     },
     json: {

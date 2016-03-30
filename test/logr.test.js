@@ -148,7 +148,7 @@ describe('logr', () => {
         }
       });
       log(['error', 'warn', 'notice'], 'message');
-      expect(lastMessage).to.equal('[\u001b[31merror\u001b[0m,\u001b[33mwarn\u001b[0m,\u001b[34mnotice\u001b[0m] message\u0007');
+      expect(lastMessage).to.equal('[\u001b[41merror\u001b[0m,\u001b[43mwarn\u001b[0m,\u001b[44mnotice\u001b[0m] message\u0007');
     });
 
     it('should allow to disable colors', () => {
