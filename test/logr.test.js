@@ -37,6 +37,39 @@ describe('logr', () => {
       log(['tag1', 'tag2'], 'message');
       expect(lastMessage).to.contain('[tag1,tag2] message');
     });
+    it('allows you to specify a tag to trigger a ding', () => {
+      const log = new Logr({
+        renderOptions: {
+          console: {
+            consoleBell : ['error', 'ding']
+          }
+        }
+      });
+      log( ['tag1', 'tag2', 'ding'], 'message with a ding added');
+      expect(lastMessage).to.contain('\u0007');
+    });
+    it('will not ding if you do not use the tags', () => {
+      const log = new Logr({
+        renderOptions: {
+          console: {
+            consoleBell : ['error', 'ding']
+          }
+        }
+      });
+      log( ['tag1', 'tag2', ], 'message with no  ding added');
+      expect(lastMessage).to.not.contain('\u0007');
+    });
+    it('allows you to disable all dings', () => {
+      const log = new Logr({
+        renderOptions: {
+          console: {
+            consoleBell : false
+          }
+        }
+      });
+      log( ['tag1', 'tag2', 'error'], 'message with a ding added');
+      expect(lastMessage).to.not.contain('\u0007');
+    });
     it('should allow disable timestamp', () => {
       const log = new Logr({
         renderOptions: {
@@ -115,7 +148,7 @@ describe('logr', () => {
         }
       });
       log(['error', 'warn', 'notice'], 'message');
-      expect(lastMessage).to.equal('[\u001b[31merror\u001b[0m,\u001b[33mwarn\u001b[0m,\u001b[34mnotice\u001b[0m] message');
+      expect(lastMessage).to.equal('[\u001b[31merror\u001b[0m,\u001b[33mwarn\u001b[0m,\u001b[34mnotice\u001b[0m] message\u0007');
     });
 
     it('should allow to disable colors', () => {
@@ -129,7 +162,7 @@ describe('logr', () => {
         }
       });
       log(['error', 'warn', 'notice'], 'message');
-      expect(lastMessage).to.equal('[error,warn,notice] message');
+      expect(lastMessage).to.equal('[error,warn,notice] message\u0007');
     });
 
     it('should allow default tags to be set', () => {
