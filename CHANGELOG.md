@@ -1,4 +1,27 @@
 
+1.7.0 / 2016-03-31
+==================
+
+  * added test for logging object, cli also supports no tags now, needs merge with tagsOptional to enable it
+  * no console bell for cli, cli also now resets color after message is printed
+  * uses original color names,  added tagless support to cli type
+  * lets you print with no tags if no default specified, added test case to support this
+  * by default colors refer to foreground unless prepended with bg.  default colors use bg color
+  * cli added, supports 'lineColor' renderOption, colors.js moved to its own file
+  * split colors into its own file
+  * supports background colors, added tests to verify
+  * added test cases
+  * fixing
+  * tests added for tagless option
+  * Merge pull request #3 from firstandthird/withDing
+  * index handles no tag option
+  * cleaned up 'for' statement with _.intersection
+  * added extra test conditions
+  * dings on specific tags, lets you specify which tags (default is 'error') updated tests that contain 'error' tag to reflect this
+  * by default, the 'ding' tag is enabled
+  * must pass 'ding' tag
+  * has a ding now
+
 1.6.0 / 2016-03-14
 ==================
 
