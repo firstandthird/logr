@@ -9,7 +9,7 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "test": "mocha -u bdd test/logr.test.js"
+    "test": "mocha -u bdd test/"
   },
   "dependencies": {
     "json-stringify-safe": "^5.0.1",

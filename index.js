@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const defaults = {
+const startingDefaults = {
   type: 'console',
   filter: null,
   defaultTags: [],
@@ -22,11 +22,23 @@ const defaults = {
     }
   }
 };
+// defaults are set globally:
+global.logr = {
+  defaults: startingDefaults
+};
 
 class Logger {
   constructor(options) {
-    this.config = _.defaultsDeep(options, defaults);
-
+    // use node's 'global' namespace
+    if (options) {
+      if (options.setDefaults) {
+        global.logr.defaults = _.defaultsDeep(options, global.logr.defaults);
+      }
+      if (options.restoreDefaults) {
+        global.logr.defaults = startingDefaults;
+      }
+    }
+    this.config = _.defaultsDeep(options, global.logr.defaults);
     this.renderers = {
       console: require('./lib/console'),
       json: require('./lib/json'),
@@ -68,8 +80,8 @@ class Logger {
 
   log(tags, message) {
     if (arguments.length === 1) {
-        message = tags;
-        tags = [];
+      message = tags;
+      tags = [];
     }
     if (!this.config.type) {
       return;

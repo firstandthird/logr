@@ -204,8 +204,8 @@ describe('logr', () => {
       log({ test: 123 });
       expect(lastMessage).to.equal('{"test":123}');
     });
-  });
 
+  });
 
   describe('cli', () => {
     it('should print correctly (indented, no timestamp, tags last)', () => {
@@ -252,7 +252,6 @@ describe('logr', () => {
       expect(lastMessage).to.equal('\x1b[42m  message\x1b[0m (\u001b[31mtag1\u001b[0m)');
     });
   });
-
 
   describe('json', () => {
     it('should output to json formatted', () => {
