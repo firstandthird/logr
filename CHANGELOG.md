@@ -1,4 +1,9 @@
 
+1.8.0 / 2016-04-29
+==================
+
+  * now lets you use 'setDefaults' to set the default config for all running instances of Logr
+
 1.7.0 / 2016-03-31
 ==================
 
