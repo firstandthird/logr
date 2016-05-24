@@ -13,6 +13,7 @@ let defaults = {
       colors: {
         error: 'bgRed',
         warn: 'bgYellow',
+        warning: 'bgYellow',
         notice: 'bgBlue'
       }
     },
