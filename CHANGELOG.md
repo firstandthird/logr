@@ -1,4 +1,11 @@
 
+1.9.0 / 2016-07-18
+==================
+
+  * added travis support and badge for readme
+  * updated cli defaults and tests
+  * 'warn' tag has the same effect as 'warning' (i.e. bgYellow)
+
 1.8.0 / 2016-04-29
 ==================
 
