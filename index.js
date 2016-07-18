@@ -20,6 +20,16 @@ let defaults = {
     json: {
       tagsObject: false,
       additional: {}
+    },
+    cli: {
+      consoleBell: ['error'],
+      pretty: true,
+      colors: {
+        error: 'bgRed',
+        warn: 'bgYellow',
+        warning: 'bgYellow',
+        notice: 'bgBlue'
+      }
     }
   }
 };

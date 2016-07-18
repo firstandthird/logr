@@ -41,33 +41,33 @@ describe('logr', () => {
       const log = new Logr({
         renderOptions: {
           console: {
-            consoleBell : ['error', 'ding']
+            consoleBell: ['error', 'ding']
           }
         }
       });
-      log( ['tag1', 'tag2', 'ding'], 'message with a ding added');
+      log(['tag1', 'tag2', 'ding'], 'message with a ding added');
       expect(lastMessage).to.contain('\u0007');
     });
     it('will not ding if you do not use the tags', () => {
       const log = new Logr({
         renderOptions: {
           console: {
-            consoleBell : ['error', 'ding']
+            consoleBell: ['error', 'ding']
           }
         }
       });
-      log( ['tag1', 'tag2', ], 'message with no  ding added');
+      log(['tag1', 'tag2'], 'message with no  ding added');
       expect(lastMessage).to.not.contain('\u0007');
     });
     it('allows you to disable all dings', () => {
       const log = new Logr({
         renderOptions: {
           console: {
-            consoleBell : false
+            consoleBell: false
           }
         }
       });
-      log( ['tag1', 'tag2', 'error'], 'message with a ding added');
+      log(['tag1', 'tag2', 'error'], 'message with a ding added');
       expect(lastMessage).to.not.contain('\u0007');
     });
     it('should allow disable timestamp', () => {
@@ -216,7 +216,6 @@ describe('logr', () => {
       log({ test: 123 });
       expect(lastMessage).to.equal('{"test":123}');
     });
-
   });
 
   describe('cli', () => {
@@ -234,7 +233,7 @@ describe('logr', () => {
       log(['tag1'], 'message');
       expect(lastMessage).to.equal('  message (\u001b[31mtag1\u001b[0m)');
     });
-    it('should print objects correctly (indented, no timestamp, tags last)', () => {
+    it('should pretty-print objects correctly (indented, no timestamp, tags last)', () => {
       const log = new Logr({
         type: 'cli',
         renderOptions: {
@@ -246,7 +245,7 @@ describe('logr', () => {
         }
       });
       log(['tag1'], { message: 123 });
-      expect(lastMessage).to.equal('  {"message":123} (\u001b[31mtag1\u001b[0m)');
+      expect(lastMessage).to.equal('  {\n  "message": 123\n} (\u001b[31mtag1\u001b[0m)');
     });
     it('should take in an optional color to color the whole line)', () => {
       const log = new Logr({
@@ -262,6 +261,27 @@ describe('logr', () => {
       });
       log(['tag1'], 'message');
       expect(lastMessage).to.equal('\x1b[42m  message\x1b[0m (\u001b[31mtag1\u001b[0m)');
+    });
+    it('should default color error, warn, notice', () => {
+      const log = new Logr({
+        type: 'cli'
+      });
+      log(['error', 'warn', 'notice'], 'message');
+      expect(lastMessage).to.equal('  message\u0007 (\u001b[41merror\u001b[0m,\u001b[43mwarn\u001b[0m,\u001b[44mnotice\u001b[0m)');
+    });
+    it('should default color error, warning, notice', () => {
+      const log = new Logr({
+        type: 'cli'
+      });
+      log(['error', 'warning', 'notice'], 'message');
+      expect(lastMessage).to.equal('  message\u0007 (\u001b[41merror\u001b[0m,\u001b[43mwarning\u001b[0m,\u001b[44mnotice\u001b[0m)');
+    });
+    it('should ding on "error" tag by default', () => {
+      const log = new Logr({
+        type: 'cli',
+      });
+      log(['error', 'tag2', 'ding'], 'message with a ding added');
+      expect(lastMessage).to.contain('\u0007');
     });
   });
 
