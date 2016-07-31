@@ -87,11 +87,18 @@ class Logger {
     if (!this.config.type) {
       return;
     }
-
     if (!this.filterMatch(this.config.filter, tags)) {
       return;
     }
-
+    if (_.isError(message)){
+      message = {
+        message: message.message,
+        stack: message.stack
+      };
+      if (tags.indexOf('error') < 0) {
+        tags.push('error');
+      }
+    }
     tags = this.config.defaultTags.concat(tags);
 
     const out = this.renderers[this.config.type](this.renderOptions, tags, message);
