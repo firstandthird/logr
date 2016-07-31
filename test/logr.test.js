@@ -216,6 +216,14 @@ describe('logr', () => {
       log({ test: 123 });
       expect(lastMessage).to.equal('{"test":123}');
     });
+    it('should be able to accept an error instance', () => {
+      const log = new Logr({});
+      log(new Error('my error'));
+      expect(lastMessage).to.include('[\u001b[41merror\u001b[0m]');
+      expect(lastMessage).to.include('my error');
+      expect(lastMessage).to.include('Error: my error');
+      expect(lastMessage).to.include('logr.test.js');
+    });
   });
 
   describe('cli', () => {
@@ -283,6 +291,17 @@ describe('logr', () => {
       log(['error', 'tag2', 'ding'], 'message with a ding added');
       expect(lastMessage).to.contain('\u0007');
     });
+    it('should be able to accept an error instance', () => {
+      const log = new Logr({
+        type: 'cli'
+      });
+      log(new Error('my error'));
+      expect(lastMessage).to.include('(\u001b[41merror\u001b[0m)');
+      expect(lastMessage).to.include('my error');
+      expect(lastMessage).to.include('Error: my error');
+      expect(lastMessage).to.include('logr.test.js');
+    });
+
   });
 
   describe('json', () => {
@@ -310,6 +329,15 @@ describe('logr', () => {
       expect(jsonMessage.tags).to.deep.equal({ tag1: true, tag2: true });
       expect(jsonMessage.message).to.equal('message');
       expect(jsonMessage.timestamp).to.exist;
+    });
+    it('should be able to accept an error instance', () => {
+      const log = new Logr({ type: 'json' });
+      log(new Error('my error'));
+      const jsonObject = JSON.parse(lastMessage);
+      expect(jsonObject.tags).to.include('error');
+      expect(jsonObject.message.message).to.include('my error');
+      expect(jsonObject.message.stack).to.include('Error: my error');
+      expect(jsonObject.message.stack).to.include('logr.test.js');
     });
     it('should allow additional data to be logged', () => {
       const log = new Logr({
