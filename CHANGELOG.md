@@ -1,4 +1,9 @@
 
+1.10.0 / 2016-07-31
+==================
+
+  * recognizes Error objects and treats them as such
+
 1.9.0 / 2016-07-18
 ==================
 
