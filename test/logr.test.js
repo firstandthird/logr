@@ -296,7 +296,7 @@ describe('logr', () => {
         type: 'cli'
       });
       log(new Error('my error'));
-      expect(lastMessage).to.include('(\u001b[41merror\u001b[0m)  ');
+      expect(lastMessage).to.include('(\u001b[41merror\u001b[0m)');
       expect(lastMessage).to.include('my error');
       expect(lastMessage).to.include('Error: my error');
       expect(lastMessage).to.include('logr.test.js');
