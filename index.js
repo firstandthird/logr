@@ -45,7 +45,15 @@ class Logger {
       json: require('./lib/json'),
       cli: require('./lib/cli'),
     };
-
+    if (this.config.plugins) {
+      _.each(options.plugins, (renderFunction, renderName) => {
+        if (typeof renderFunction === 'string') {
+          this.renderers[renderName] = require(renderFunction);
+          return;
+        }
+        this.renderers[renderName] = renderFunction;
+      });
+    }
     if (options && options.type === false) {
       this.config.type = false;
     }
@@ -106,6 +114,7 @@ class Logger {
     console.log(out);
     /*eslint-enable no-console*/
   }
+
 }
 
 module.exports = Logger;
