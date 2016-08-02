@@ -2,7 +2,7 @@
 'use strict';
 const expect = require('chai').expect;
 const Logr = require('../');
-
+const path = require('path');
 describe('logr', () => {
   let lastMessage = null;
 
@@ -301,7 +301,6 @@ describe('logr', () => {
       expect(lastMessage).to.include('Error: my error');
       expect(lastMessage).to.include('logr.test.js');
     });
-
   });
 
   describe('json', () => {
@@ -404,5 +403,53 @@ describe('logr', () => {
       log(['tag2'], 'message2');
       expect(lastMessage).to.equal('[tag1] message1');
     });
+  });
+});
+
+describe('logr plugins', function() {
+  it('can load a plugin from code', (done) => {
+    const pluginCalls = {};
+    const log = new Logr({
+      type: 'anExamplePlugin',
+      renderOptions: {
+        anExamplePlugin: {
+          colors: {
+            tag1: 'red'
+          }
+        }
+      },
+      plugins: {
+        anExamplePlugin: (options, tags, message) => {
+          pluginCalls.options = options;
+          pluginCalls.tags = tags;
+          pluginCalls.message = message;
+        }
+      }
+    });
+    log(['myTag', 'tag1'], 'my message');
+    expect(pluginCalls.tags.length).to.equal(2);
+    expect(pluginCalls.tags[0]).to.equal('myTag');
+    expect(pluginCalls.message).to.equal('my message');
+    expect(pluginCalls.options.colors.tag1).to.equal('red');
+    done();
+  });
+  it('can load a plugin with require ', (done) => {
+    const log = new Logr({
+      type: 'aSamplePlugin',
+      plugins: {
+        aSamplePlugin: path.join(__dirname, 'aSamplePlugin.js')
+      }
+    });
+    const prevConsole = console.log;
+    const pluginCalls = {
+      set: false
+    };
+    console.log = () => {
+      pluginCalls.set = true;
+    };
+    log(['tag1', 'tag2'], 'my message');
+    console.log = prevConsole;
+    expect(pluginCalls.set).to.equal(true);
+    done();
   });
 });
