@@ -1,4 +1,9 @@
 
+1.11.0 / 2016-08-01
+==================
+
+  * can accept plugins, either as functions or as 'require'-able strings
+
 1.10.0 / 2016-07-31
 ==================
 
