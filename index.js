@@ -46,12 +46,26 @@ class Logger {
       cli: require('./lib/cli'),
     };
     if (this.config.plugins) {
-      _.each(options.plugins, (renderFunction, renderName) => {
-        if (typeof renderFunction === 'string') {
-          this.renderers[renderName] = require(renderFunction);
-          return;
+      _.each(options.plugins, (renderer, renderName) => {
+        // renderers can be passed directly or with a path to module:
+        let plugin;
+        if (typeof renderer === 'string') {
+          plugin = require(renderer);
+        } else {
+          plugin = renderer;
         }
-        this.renderers[renderName] = renderFunction;
+        // each renderer can either be a callable function or an
+        // object having a 'register' and 'render' function
+        if (plugin.register) {
+          plugin.register(this.config, (err) => {
+            if (err) {
+              return console.log(err);
+            }
+            this.renderers[renderName] = plugin.render;
+          });
+        } else if (typeof plugin === 'function') {
+          this.renderers[renderName] = plugin;
+        }
       });
     }
     if (options && options.type === false) {

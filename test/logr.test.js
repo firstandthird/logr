@@ -452,4 +452,39 @@ describe('logr plugins', function() {
     expect(pluginCalls.set).to.equal(true);
     done();
   });
+  it('can load a plugin with a register and render method', (done) => {
+    const pluginCalls = {
+      registered: false
+    };
+    const log = new Logr({
+      type: 'anExamplePlugin',
+      renderOptions: {
+        anExamplePlugin: {
+          colors: {
+            tag1: 'red'
+          }
+        }
+      },
+      plugins: {
+        anExamplePlugin: {
+          register: (options, callback) => {
+            pluginCalls.registered = true;
+            callback();
+          },
+          render: (options, tags, message) => {
+            pluginCalls.options = options;
+            pluginCalls.tags = tags;
+            pluginCalls.message = message;
+          }
+        }
+      }
+    });
+    expect(pluginCalls.registered).to.equal(true);
+    log(['myTag', 'tag1'], 'my message');
+    expect(pluginCalls.tags.length).to.equal(2);
+    expect(pluginCalls.tags[0]).to.equal('myTag');
+    expect(pluginCalls.message).to.equal('my message');
+    expect(pluginCalls.options.colors.tag1).to.equal('red');
+    done();
+  });
 });
