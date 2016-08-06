@@ -57,7 +57,7 @@ class Logger {
         // each renderer can either be a callable function or an
         // object having a 'register' and 'render' function
         if (plugin.register) {
-          plugin.register(this.config, (err) => {
+          plugin.register(this.config.renderOptions[renderName], (err) => {
             if (err) {
               return console.log(err);
             }
