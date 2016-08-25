@@ -49,9 +49,11 @@ class Logger {
       _.each(options.plugins, (renderFunction, renderName) => {
         if (typeof renderFunction === 'string') {
           this.renderers[renderName] = require(renderFunction);
+          this.renderers[renderName].renderOptions = this.config.renderOptions[renderName];
           return;
         }
         this.renderers[renderName] = renderFunction;
+        this.renderers[renderName].renderOptions = this.config.renderOptions[renderName];
       });
     }
     if (options && options.type === false) {
@@ -69,12 +71,19 @@ class Logger {
     if (process.env.LOGR_FILTER) {
       this.config.filter = process.env.LOGR_FILTER.split(',');
     }
-
-    if (this.config.type && !this.renderers[this.config.type]) {
-      throw new Error('invalid type');
+    if (this.config.type !== false) {
+      // type could be specified by a single string:
+      if (typeof this.config.type === 'string') {
+        this.config.type = [this.config.type];
+      }
+      this.config.type.forEach((type) => {
+        console.log('registering type %s', type)
+        if (!this.renderers[type]) {
+          throw new Error('invalid type');
+        }
+        this.renderers[type].renderOptions = this.config.renderOptions[type];
+      });
     }
-    this.renderOptions = this.config.renderOptions[this.config.type];
-
     return this.log.bind(this);
   }
 
@@ -108,13 +117,16 @@ class Logger {
       }
     }
     tags = this.config.defaultTags.concat(tags);
-
-    const out = this.renderers[this.config.type](this.renderOptions, tags, message);
-    /*eslint-disable no-console*/
-    console.log(out);
-    /*eslint-enable no-console*/
+    Object.keys(this.renderers).forEach((type) => {
+      const renderer = this.renderers[type];
+      if (renderer.renderOptions !== undefined) {
+        const out = renderer(renderer.renderOptions, tags, message);
+        /*eslint-disable no-console*/
+        console.log(out);
+        /*eslint-enable no-console*/
+      }
+    });
   }
-
 }
 
 module.exports = Logger;
