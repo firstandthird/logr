@@ -403,9 +403,6 @@ describe('logr', () => {
     });
   });
 
-  describe('multiple reporters', () => {
-
-  });
 });
 
 describe('logr plugins', function() {
