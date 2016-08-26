@@ -1,5 +1,10 @@
 'use strict';
 
+//todo: see what options are being held-over from previous instances of Logr:
+//
+//
+//
+
 const _ = require('lodash');
 let defaults = {
   type: 'console',
@@ -45,15 +50,15 @@ class Logger {
       json: require('./lib/json'),
       cli: require('./lib/cli'),
     };
+    // list of keys of renderers to use:
+    this.activeRenderers = [];
     if (this.config.plugins) {
       _.each(options.plugins, (renderFunction, renderName) => {
         if (typeof renderFunction === 'string') {
           this.renderers[renderName] = require(renderFunction);
-          this.renderers[renderName].renderOptions = this.config.renderOptions[renderName];
           return;
         }
         this.renderers[renderName] = renderFunction;
-        this.renderers[renderName].renderOptions = this.config.renderOptions[renderName];
       });
     }
     if (options && options.type === false) {
@@ -71,17 +76,17 @@ class Logger {
     if (process.env.LOGR_FILTER) {
       this.config.filter = process.env.LOGR_FILTER.split(',');
     }
+    // make sure all 'types' are set up:
     if (this.config.type !== false) {
       // type could be specified by a single string:
       if (typeof this.config.type === 'string') {
         this.config.type = [this.config.type];
       }
       this.config.type.forEach((type) => {
-        console.log('registering type %s', type)
         if (!this.renderers[type]) {
           throw new Error('invalid type');
         }
-        this.renderers[type].renderOptions = this.config.renderOptions[type];
+        this.activeRenderers.push(type);
       });
     }
     return this.log.bind(this);
@@ -101,7 +106,7 @@ class Logger {
       message = tags;
       tags = [];
     }
-    if (!this.config.type) {
+    if (!this.config.type || this.config.type.length === 0) {
       return;
     }
     if (!this.filterMatch(this.config.filter, tags)) {
@@ -117,14 +122,13 @@ class Logger {
       }
     }
     tags = this.config.defaultTags.concat(tags);
-    Object.keys(this.renderers).forEach((type) => {
+    // const renderer = this.renderers[this.config.type[0]];
+    this.activeRenderers.forEach((type) => {
       const renderer = this.renderers[type];
-      if (renderer.renderOptions !== undefined) {
-        const out = renderer(renderer.renderOptions, tags, message);
-        /*eslint-disable no-console*/
-        console.log(out);
-        /*eslint-enable no-console*/
-      }
+      const out = renderer(this.config.renderOptions[type], tags, message);
+      /*eslint-disable no-console*/
+      console.log(out);
+      /*eslint-enable no-console*/
     });
   }
 }

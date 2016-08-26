@@ -14,14 +14,12 @@ describe('logr', () => {
     };
     done();
   });
-
   describe('init', () => {
     it('should return a function', () => {
       const log = new Logr();
       expect(typeof log).to.equal('function');
     });
   });
-
   describe('no type', () => {
     it('should not output', () => {
       const oldMessage = lastMessage;
@@ -227,6 +225,37 @@ describe('logr', () => {
   });
 
   describe('cli', () => {
+    it('should default color error, warn, notice', () => {
+      const log = new Logr({
+        type: 'cli'
+      });
+      log(['error', 'warn', 'notice'], 'message');
+      expect(lastMessage).to.equal('  message\u0007 (\u001b[41merror\u001b[0m,\u001b[43mwarn\u001b[0m,\u001b[44mnotice\u001b[0m)');
+    });
+    it('should default color error, warning, notice', () => {
+      const log = new Logr({
+        type: 'cli'
+      });
+      log(['error', 'warning', 'notice'], 'message');
+      expect(lastMessage).to.equal('  message\u0007 (\u001b[41merror\u001b[0m,\u001b[43mwarning\u001b[0m,\u001b[44mnotice\u001b[0m)');
+    });
+    it('should ding on "error" tag by default', () => {
+      const log = new Logr({
+        type: 'cli',
+      });
+      log(['error', 'tag2', 'ding'], 'message with a ding added');
+      expect(lastMessage).to.contain('\u0007');
+    });
+    it('should be able to accept an error instance', () => {
+      const log = new Logr({
+        type: 'cli'
+      });
+      log(new Error('my error'));
+      expect(lastMessage).to.include('(\u001b[41merror\u001b[0m)');
+      expect(lastMessage).to.include('my error');
+      expect(lastMessage).to.include('Error: my error');
+      expect(lastMessage).to.include('logr.test.js');
+    });
     it('should print correctly (indented, no timestamp, tags last)', () => {
       const log = new Logr({
         type: 'cli',
@@ -269,37 +298,6 @@ describe('logr', () => {
       });
       log(['tag1'], 'message');
       expect(lastMessage).to.equal('\x1b[42m  message\x1b[0m (\u001b[31mtag1\u001b[0m)');
-    });
-    it('should default color error, warn, notice', () => {
-      const log = new Logr({
-        type: 'cli'
-      });
-      log(['error', 'warn', 'notice'], 'message');
-      expect(lastMessage).to.equal('  message\u0007 (\u001b[41merror\u001b[0m,\u001b[43mwarn\u001b[0m,\u001b[44mnotice\u001b[0m)');
-    });
-    it('should default color error, warning, notice', () => {
-      const log = new Logr({
-        type: 'cli'
-      });
-      log(['error', 'warning', 'notice'], 'message');
-      expect(lastMessage).to.equal('  message\u0007 (\u001b[41merror\u001b[0m,\u001b[43mwarning\u001b[0m,\u001b[44mnotice\u001b[0m)');
-    });
-    it('should ding on "error" tag by default', () => {
-      const log = new Logr({
-        type: 'cli',
-      });
-      log(['error', 'tag2', 'ding'], 'message with a ding added');
-      expect(lastMessage).to.contain('\u0007');
-    });
-    it('should be able to accept an error instance', () => {
-      const log = new Logr({
-        type: 'cli'
-      });
-      log(new Error('my error'));
-      expect(lastMessage).to.include('(\u001b[41merror\u001b[0m)');
-      expect(lastMessage).to.include('my error');
-      expect(lastMessage).to.include('Error: my error');
-      expect(lastMessage).to.include('logr.test.js');
     });
   });
 
@@ -404,8 +402,11 @@ describe('logr', () => {
       expect(lastMessage).to.equal('[tag1] message1');
     });
   });
-});
 
+  describe('multiple reporters', () => {
+
+  });
+});
 describe('logr plugins', function() {
   it('can load a plugin from code', (done) => {
     const pluginCalls = {};
