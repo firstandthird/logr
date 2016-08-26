@@ -404,9 +404,48 @@ describe('logr', () => {
   });
 
   describe('multiple reporters', () => {
-
+    it('should be able to use multiple extended plugins with filters', () => {
+      let testTags = false;
+      let testData = false;
+      const log = new Logr({
+        reporters: {
+          test: {
+            render: (options, tags, data) => {
+              testTags = tags;
+              testData = data;
+            },
+            options: {
+              option1: 'hi',
+              option2: 'bye'
+            }
+          }
+        },
+        type: [{
+          reporter: 'cli',
+          filter: ['do-cli']
+        },
+          {
+            reporter: 'test',
+            filter: ['do-test']
+          }
+      ],
+        filter: ['tag1'],
+        renderOptions: {
+          console: {
+            timestamp: false
+          }
+        }
+      });
+      log(['tag1', 'do-cli'], 'message1');
+      log(['tag1', 'do-test'], 'message2');
+      expect(testTags).to.not.equal(false);
+      expect(testData).to.equal('message2');
+      log(['tag1'], 'no')
+      expect(testData).to.equal('message2');
+    });
   });
 });
+
 describe('logr plugins', function() {
   it('can load a plugin from code', (done) => {
     const pluginCalls = {};

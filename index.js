@@ -1,10 +1,5 @@
 'use strict';
 
-//todo: see what options are being held-over from previous instances of Logr:
-//
-//
-//
-
 const _ = require('lodash');
 let defaults = {
   type: 'console',
@@ -50,17 +45,25 @@ class Logger {
       json: require('./lib/json'),
       cli: require('./lib/cli'),
     };
-    // list of keys of renderers to use:
-    this.activeRenderers = [];
+    if (this.config.reporters) {
+      this.config.plugins = this.config.reporters;
+    }
     if (this.config.plugins) {
       _.each(options.plugins, (renderFunction, renderName) => {
         if (typeof renderFunction === 'string') {
           this.renderers[renderName] = require(renderFunction);
           return;
         }
+        if (typeof renderFunction === 'object') {
+          this.renderers[renderName] = renderFunction.render;
+          return;
+        }
         this.renderers[renderName] = renderFunction;
       });
     }
+    // list of keys of renderers to use:
+    this.activeRenderers = [];
+    this.activeFilters = {};
     if (options && options.type === false) {
       this.config.type = false;
     }
@@ -83,10 +86,18 @@ class Logger {
         this.config.type = [this.config.type];
       }
       this.config.type.forEach((type) => {
-        if (!this.renderers[type]) {
-          throw new Error('invalid type');
+        if (typeof type === 'string') {
+          if (!this.renderers[type]) {
+            throw new Error('invalid type');
+          }
+          this.activeRenderers.push(type);
+        } else {
+          if (!this.renderers[type.reporter]) {
+            throw new Error('invalid type');
+          }
+          this.activeRenderers.push(type.reporter);
+          this.activeFilters[type.reporter] = type.filter;
         }
-        this.activeRenderers.push(type);
       });
     }
     return this.log.bind(this);
@@ -125,10 +136,12 @@ class Logger {
     // const renderer = this.renderers[this.config.type[0]];
     this.activeRenderers.forEach((type) => {
       const renderer = this.renderers[type];
-      const out = renderer(this.config.renderOptions[type], tags, message);
-      /*eslint-disable no-console*/
-      console.log(out);
-      /*eslint-enable no-console*/
+      if (this.activeFilters[type] === undefined || _.intersection(tags, this.activeFilters[type]).length > 0) {
+        const out = renderer(this.config.renderOptions[type], tags, message);
+        /*eslint-disable no-console*/
+        console.log(out);
+        /*eslint-enable no-console*/
+      }
     });
   }
 }
