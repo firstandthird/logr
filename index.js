@@ -51,14 +51,24 @@ class Logger {
     if (this.config.plugins) {
       _.each(options.plugins, (renderFunction, renderName) => {
         if (typeof renderFunction === 'string') {
-          this.renderers[renderName] = require(renderFunction);
-          return;
+          renderFunction = require(renderFunction);
         }
-        if (typeof renderFunction === 'object') {
-          this.renderers[renderName] = renderFunction.render;
-          return;
+        if (typeof renderFunction === 'function') {
+            this.renderers[renderName] = renderFunction ;
+        } else {
+          // if the plugin has a 'register' method, register it:
+          if (renderFunction.register) {
+            renderFunction.register(this.config.renderOptions[renderName], (err) => {
+              if (err) {
+                throw err;
+              }
+            });
+          }
+          // if the plugin defines a 'render' method, make it available:
+          if (renderFunction.render) {
+            this.renderers[renderName] = renderFunction.render;
+          }
         }
-        this.renderers[renderName] = renderFunction;
       });
     }
     // list of keys of renderers to use:
@@ -133,10 +143,9 @@ class Logger {
       }
     }
     tags = this.config.defaultTags.concat(tags);
-    // const renderer = this.renderers[this.config.type[0]];
     this.activeRenderers.forEach((type) => {
       const renderer = this.renderers[type];
-      if (this.activeFilters[type] === undefined || _.intersection(tags, this.activeFilters[type]).length > 0) {
+      if (this.activeFilters[type] === undefined || this.filterMatch(tags, this.activeFilters[type])) {
         const out = renderer(this.config.renderOptions[type], tags, message);
         /*eslint-disable no-console*/
         console.log(out);

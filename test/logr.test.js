@@ -404,45 +404,7 @@ describe('logr', () => {
   });
 
   describe('multiple reporters', () => {
-    it('should be able to use multiple extended plugins with filters', () => {
-      let testTags = false;
-      let testData = false;
-      const log = new Logr({
-        reporters: {
-          test: {
-            render: (options, tags, data) => {
-              testTags = tags;
-              testData = data;
-            },
-            options: {
-              option1: 'hi',
-              option2: 'bye'
-            }
-          }
-        },
-        type: [{
-          reporter: 'cli',
-          filter: ['do-cli']
-        },
-          {
-            reporter: 'test',
-            filter: ['do-test']
-          }
-      ],
-        filter: ['tag1'],
-        renderOptions: {
-          console: {
-            timestamp: false
-          }
-        }
-      });
-      log(['tag1', 'do-cli'], 'message1');
-      log(['tag1', 'do-test'], 'message2');
-      expect(testTags).to.not.equal(false);
-      expect(testData).to.equal('message2');
-      log(['tag1'], 'no')
-      expect(testData).to.equal('message2');
-    });
+
   });
 });
 
@@ -490,6 +452,98 @@ describe('logr plugins', function() {
     log(['tag1', 'tag2'], 'my message');
     console.log = prevConsole;
     expect(pluginCalls.set).to.equal(true);
+    done();
+  });
+  it('should be able to use multiple extended plugins with filters', (done) => {
+    let testTags = false;
+    let testData = false;
+    let testOptions = false;
+    const log = new Logr({
+      reporters: {
+        test: {
+          render: (options, tags, data) => {
+            testTags = tags;
+            testData = data;
+            testOptions = options;
+          },
+          options: {
+            option1: 'hi',
+            option2: 'bye'
+          }
+        }
+      },
+      type: [{
+        reporter: 'cli',
+        filter: ['do-cli']
+      },
+        {
+          reporter: 'test',
+          filter: ['do-test']
+        }
+    ],
+      filter: ['tag1'],
+      renderOptions: {
+        console: {
+          timestamp: false
+        },
+        test: {
+          someOptions: 'isSet'
+        }
+      }
+    });
+    log(['tag1', 'do-cli'], 'message1');
+    log(['tag1', 'do-test'], 'message2');
+    expect(testTags).to.not.equal(false);
+    expect(testData).to.equal('message2');
+    log(['tag1'], 'no')
+    expect(testData).to.equal('message2');
+    expect(testOptions).to.not.equal(false);
+    expect(testOptions.someOptions).to.equal('isSet');
+    done();
+  });
+  it('should be able to load a plugin from an object', (done) => {
+    let renderTags = false;
+    let renderData = false;
+    let renderOptions = false;
+    let registerOptions = false;
+    const plugin = {
+      register: (options, callback) => {
+        registerOptions = options;
+        callback();
+      },
+      render: (options, tags, msg) => {
+        renderTags = tags;
+        renderData = msg;
+        renderOptions = options;
+      }
+    };
+    const log = new Logr({
+      reporters: {
+        test: plugin
+      },
+      type: [{
+        reporter: 'cli'
+      },
+        {
+          reporter: 'test'
+        }
+    ],
+      renderOptions: {
+        console: {
+          timestamp: false
+        },
+        test: {
+          someOptions: 'set'
+        }
+      }
+    });
+    log(['test-tag'], 'a msg');
+    // expects here:
+    expect(renderTags).to.not.equal(false);
+    expect(renderData).to.equal('a msg');
+    expect(renderOptions).to.not.equal(false);
+    expect(registerOptions).to.not.equal(false);
+    expect(registerOptions.someOptions).to.equal('set');
     done();
   });
 });
