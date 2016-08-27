@@ -402,7 +402,6 @@ describe('logr', () => {
       expect(lastMessage).to.equal('[tag1] message1');
     });
   });
-
 });
 
 describe('logr reporters', function() {
@@ -492,7 +491,7 @@ describe('logr reporters', function() {
     log(['tag1', 'do-test'], 'message2');
     expect(testTags).to.not.equal(false);
     expect(testData).to.equal('message2');
-    log(['tag1'], 'no')
+    log(['tag1'], 'no');
     expect(testData).to.equal('message2');
     expect(testOptions).to.not.equal(false);
     expect(testOptions.someOptions).to.equal('isSet');

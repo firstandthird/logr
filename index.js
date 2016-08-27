@@ -51,7 +51,7 @@ class Logger {
           renderFunction = require(renderFunction);
         }
         if (typeof renderFunction === 'function') {
-            this.renderers[renderName] = renderFunction ;
+          this.renderers[renderName] = renderFunction;
         } else {
           // if the reporter has a 'register' method, register it:
           if (renderFunction.register) {
@@ -130,7 +130,7 @@ class Logger {
     if (!this.filterMatch(this.config.filter, tags)) {
       return;
     }
-    if (_.isError(message)){
+    if (_.isError(message)) {
       message = {
         message: message.message,
         stack: message.stack
