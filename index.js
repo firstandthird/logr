@@ -46,17 +46,14 @@ class Logger {
       cli: require('./lib/cli'),
     };
     if (this.config.reporters) {
-      this.config.plugins = this.config.reporters;
-    }
-    if (this.config.plugins) {
-      _.each(options.plugins, (renderFunction, renderName) => {
+      _.each(options.reporters, (renderFunction, renderName) => {
         if (typeof renderFunction === 'string') {
           renderFunction = require(renderFunction);
         }
         if (typeof renderFunction === 'function') {
             this.renderers[renderName] = renderFunction ;
         } else {
-          // if the plugin has a 'register' method, register it:
+          // if the reporter has a 'register' method, register it:
           if (renderFunction.register) {
             renderFunction.register(this.config.renderOptions[renderName], (err) => {
               if (err) {
@@ -64,7 +61,7 @@ class Logger {
               }
             });
           }
-          // if the plugin defines a 'render' method, make it available:
+          // if the reporter defines a 'render' method, make it available:
           if (renderFunction.render) {
             this.renderers[renderName] = renderFunction.render;
           }

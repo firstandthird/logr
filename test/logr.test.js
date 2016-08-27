@@ -405,53 +405,53 @@ describe('logr', () => {
 
 });
 
-describe('logr plugins', function() {
-  it('can load a plugin from code', (done) => {
-    const pluginCalls = {};
+describe('logr reporters', function() {
+  it('can load a reporter from code', (done) => {
+    const reporterCalls = {};
     const log = new Logr({
-      type: 'anExamplePlugin',
+      type: 'anExampleReporter',
       renderOptions: {
-        anExamplePlugin: {
+        anExampleReporter: {
           colors: {
             tag1: 'red'
           }
         }
       },
-      plugins: {
-        anExamplePlugin: (options, tags, message) => {
-          pluginCalls.options = options;
-          pluginCalls.tags = tags;
-          pluginCalls.message = message;
+      reporters: {
+        anExampleReporter: (options, tags, message) => {
+          reporterCalls.options = options;
+          reporterCalls.tags = tags;
+          reporterCalls.message = message;
         }
       }
     });
     log(['myTag', 'tag1'], 'my message');
-    expect(pluginCalls.tags.length).to.equal(2);
-    expect(pluginCalls.tags[0]).to.equal('myTag');
-    expect(pluginCalls.message).to.equal('my message');
-    expect(pluginCalls.options.colors.tag1).to.equal('red');
+    expect(reporterCalls.tags.length).to.equal(2);
+    expect(reporterCalls.tags[0]).to.equal('myTag');
+    expect(reporterCalls.message).to.equal('my message');
+    expect(reporterCalls.options.colors.tag1).to.equal('red');
     done();
   });
-  it('can load a plugin with require ', (done) => {
+  it('can load a reporter with require ', (done) => {
     const log = new Logr({
-      type: 'aSamplePlugin',
-      plugins: {
-        aSamplePlugin: path.join(__dirname, 'aSamplePlugin.js')
+      type: 'aSampleReporter',
+      reporters: {
+        aSampleReporter: path.join(__dirname, 'aSampleReporter.js')
       }
     });
     const prevConsole = console.log;
-    const pluginCalls = {
+    const reporterCalls = {
       set: false
     };
     console.log = () => {
-      pluginCalls.set = true;
+      reporterCalls.set = true;
     };
     log(['tag1', 'tag2'], 'my message');
     console.log = prevConsole;
-    expect(pluginCalls.set).to.equal(true);
+    expect(reporterCalls.set).to.equal(true);
     done();
   });
-  it('should be able to use multiple extended plugins with filters', (done) => {
+  it('should be able to use multiple extended reporters with filters', (done) => {
     let testTags = false;
     let testData = false;
     let testOptions = false;
@@ -498,12 +498,12 @@ describe('logr plugins', function() {
     expect(testOptions.someOptions).to.equal('isSet');
     done();
   });
-  it('should be able to load a plugin from an object', (done) => {
+  it('should be able to load a reporter from an object', (done) => {
     let renderTags = false;
     let renderData = false;
     let renderOptions = false;
     let registerOptions = false;
-    const plugin = {
+    const reporter = {
       register: (options, callback) => {
         registerOptions = options;
         callback();
@@ -516,7 +516,7 @@ describe('logr plugins', function() {
     };
     const log = new Logr({
       reporters: {
-        test: plugin
+        test: reporter
       },
       type: [{
         reporter: 'cli'
