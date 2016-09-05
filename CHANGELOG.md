@@ -1,4 +1,10 @@
 
+1.13.0 / 2016-09-05
+==================
+
+  * updated lodash
+  * use instanceof Error intead of lodash `_.isError` because of false positives
+
 1.12.0 / 2016-09-05
 ==================
 
