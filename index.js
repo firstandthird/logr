@@ -45,15 +45,32 @@ class Logger {
       json: require('./lib/json'),
       cli: require('./lib/cli'),
     };
-    if (this.config.plugins) {
-      _.each(options.plugins, (renderFunction, renderName) => {
+    if (this.config.reporters) {
+      _.each(options.reporters, (renderFunction, renderName) => {
         if (typeof renderFunction === 'string') {
-          this.renderers[renderName] = require(renderFunction);
-          return;
+          renderFunction = require(renderFunction);
         }
-        this.renderers[renderName] = renderFunction;
+        if (typeof renderFunction === 'function') {
+          this.renderers[renderName] = renderFunction;
+        } else {
+          // if the reporter has a 'register' method, register it:
+          if (renderFunction.register) {
+            renderFunction.register(this.config.renderOptions[renderName], (err) => {
+              if (err) {
+                throw err;
+              }
+            });
+          }
+          // if the reporter defines a 'render' method, make it available:
+          if (renderFunction.render) {
+            this.renderers[renderName] = renderFunction.render;
+          }
+        }
       });
     }
+    // list of keys of renderers to use:
+    this.activeRenderers = [];
+    this.activeFilters = {};
     if (options && options.type === false) {
       this.config.type = false;
     }
@@ -69,12 +86,27 @@ class Logger {
     if (process.env.LOGR_FILTER) {
       this.config.filter = process.env.LOGR_FILTER.split(',');
     }
-
-    if (this.config.type && !this.renderers[this.config.type]) {
-      throw new Error('invalid type');
+    // make sure all 'types' are set up:
+    if (this.config.type !== false) {
+      // type could be specified by a single string:
+      if (typeof this.config.type === 'string') {
+        this.config.type = [this.config.type];
+      }
+      this.config.type.forEach((type) => {
+        if (typeof type === 'string') {
+          if (!this.renderers[type]) {
+            throw new Error('invalid type');
+          }
+          this.activeRenderers.push(type);
+        } else {
+          if (!this.renderers[type.reporter]) {
+            throw new Error('invalid type');
+          }
+          this.activeRenderers.push(type.reporter);
+          this.activeFilters[type.reporter] = type.filter;
+        }
+      });
     }
-    this.renderOptions = this.config.renderOptions[this.config.type];
-
     return this.log.bind(this);
   }
 
@@ -92,13 +124,13 @@ class Logger {
       message = tags;
       tags = [];
     }
-    if (!this.config.type) {
+    if (!this.config.type || this.config.type.length === 0) {
       return;
     }
     if (!this.filterMatch(this.config.filter, tags)) {
       return;
     }
-    if (_.isError(message)){
+    if (_.isError(message)) {
       message = {
         message: message.message,
         stack: message.stack
@@ -108,13 +140,16 @@ class Logger {
       }
     }
     tags = this.config.defaultTags.concat(tags);
-
-    const out = this.renderers[this.config.type](this.renderOptions, tags, message);
-    /*eslint-disable no-console*/
-    console.log(out);
-    /*eslint-enable no-console*/
+    this.activeRenderers.forEach((type) => {
+      const renderer = this.renderers[type];
+      if (this.activeFilters[type] === undefined || this.filterMatch(tags, this.activeFilters[type])) {
+        const out = renderer(this.config.renderOptions[type], tags, message);
+        /*eslint-disable no-console*/
+        console.log(out);
+        /*eslint-enable no-console*/
+      }
+    });
   }
-
 }
 
 module.exports = Logger;
