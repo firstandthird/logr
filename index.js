@@ -130,7 +130,7 @@ class Logger {
     if (!this.filterMatch(this.config.filter, tags)) {
       return;
     }
-    if (_.isError(message)) {
+    if (message instanceof Error) {
       message = {
         message: message.message,
         stack: message.stack

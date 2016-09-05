@@ -86,6 +86,12 @@ describe('logr', () => {
       expect(lastMessage).to.equal('[tag1] {"message":"hi there"}');
     });
 
+    it('should not think an object is an error', () => {
+      const log = new Logr({ renderOptions: { console: { timestamp: false } } });
+      log(['tag1'], { message: 'hi there', name: 'bob' });
+      expect(lastMessage).to.equal('[tag1] {"message":"hi there","name":"bob"}');
+    });
+
     it('should stringify json in a safe way', () => {
       const circularObj = {};
       circularObj.circularRef = circularObj;
