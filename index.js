@@ -124,6 +124,16 @@ class Logger {
       message = tags;
       tags = [];
     }
+    if (this.config.exclude) {
+      // if it's a string and it's in the list of tags then don't log:
+      if (typeof this.config.exclude === 'string') {
+        if (tags.indexOf(this.config.exclude) > -1) {
+          return;
+        }
+      } else if (_.intersection(this.config.exclude, tags).length > 0) {
+        return;
+      }
+    }
     if (!this.config.type || this.config.type.length === 0) {
       return;
     }
