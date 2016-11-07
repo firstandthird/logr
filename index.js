@@ -125,7 +125,7 @@ class Logger {
       tags = [];
     }
     if (this.config.exclude) {
-      // if it's a string and it's in the list of tags then don't log:
+      // exclude can be either a string or a list of strings:
       if (typeof this.config.exclude === 'string') {
         if (tags.indexOf(this.config.exclude) > -1) {
           return;
