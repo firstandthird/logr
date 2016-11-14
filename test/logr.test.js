@@ -408,6 +408,23 @@ describe('logr', () => {
       expect(lastMessage).to.equal('[tag1] message1');
     });
   });
+
+  describe('excludes', () => {
+    it ('should exclude a specified tags', () => {
+      const log = new Logr({ exclude: 'tag1', renderOptions: { console: { timestamp: false } } });
+      log(['tag1', 'tag2'], 'message1');
+      expect(lastMessage).to.not.equal('[tag1,tag2] message1');
+      log(['tag2', 'tag3'], 'message2');
+      expect(lastMessage).to.equal('[tag2,tag3] message2');
+    });
+    it ('should exclude from a list of one or more specified tags', () => {
+      const log = new Logr({ exclude: ['tag1'], renderOptions: { console: { timestamp: false } } });
+      log(['tag1', 'tag2'], 'message1');
+      expect(lastMessage).to.not.equal('[tag1,tag2] message1');
+      log(['tag2', 'tag3'], 'message2');
+      expect(lastMessage).to.equal('[tag2,tag3] message2');
+    });
+  });
 });
 
 describe('logr reporters', function() {

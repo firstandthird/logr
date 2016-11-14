@@ -124,6 +124,16 @@ class Logger {
       message = tags;
       tags = [];
     }
+    if (this.config.exclude) {
+      // exclude can be either a string or a list of strings:
+      if (typeof this.config.exclude === 'string') {
+        if (tags.indexOf(this.config.exclude) > -1) {
+          return;
+        }
+      } else if (_.intersection(this.config.exclude, tags).length > 0) {
+        return;
+      }
+    }
     if (!this.config.type || this.config.type.length === 0) {
       return;
     }
