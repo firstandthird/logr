@@ -303,7 +303,24 @@ describe('logr', () => {
         }
       });
       log(['tag1'], 'message');
-      expect(lastMessage).to.equal('\x1b[42m  message\x1b[0m (\u001b[31mtag1\u001b[0m)');
+      expect(lastMessage).to.equal('  \x1b[42mmessage\x1b[0m (\u001b[31mtag1\u001b[0m)');
+    });
+
+    it('should take in an optional prefix and color the prefix)', () => {
+      const log = new Logr({
+        type: 'cli',
+        renderOptions: {
+          cli: {
+            prefix: 'app | ',
+            prefixColor: 'bgGreen',
+            colors: {
+              tag1: 'red'
+            }
+          }
+        }
+      });
+      log(['tag1'], 'message');
+      expect(lastMessage).to.equal('\u001b[42mapp | \u001b[0mmessage (\u001b[31mtag1\u001b[0m)');
     });
   });
 
