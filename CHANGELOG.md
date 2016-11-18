@@ -1,4 +1,10 @@
 
+1.15.0 / 2016-11-18
+==================
+
+  * updated eslint
+  * added prefix and prefixColor to cli options
+
 1.14.0 / 2016-11-14
 ==================
 
