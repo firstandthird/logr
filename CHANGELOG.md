@@ -1,4 +1,10 @@
 
+1.16.0 / 2016-11-24
+==================
+
+  * pass in custom logger to clean up test output
+  * be able to override logger function (defaults to console.log)
+
 1.15.0 / 2016-11-18
 ==================
 
