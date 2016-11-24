@@ -107,6 +107,10 @@ class Logger {
         }
       });
     }
+    if (this.config.logger) {
+      this.logger = this.config.logger;
+    }
+
     return this.log.bind(this);
   }
 
@@ -154,11 +158,13 @@ class Logger {
       const renderer = this.renderers[type];
       if (this.activeFilters[type] === undefined || this.filterMatch(tags, this.activeFilters[type])) {
         const out = renderer(this.config.renderOptions[type], tags, message);
-        /*eslint-disable no-console*/
-        console.log(out);
-        /*eslint-enable no-console*/
+        this.logger(out);
       }
     });
+  }
+
+  logger(msg) {
+    console.log(msg); //eslint-disable-line no-console
   }
 }
 

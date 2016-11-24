@@ -20,6 +20,20 @@ describe('logr', () => {
       expect(typeof log).to.equal('function');
     });
   });
+  describe('override logger', () => {
+    it('should call custom function', (done) => {
+      const log = new Logr({
+        renderOptions: {
+          console: { timestamp: false }
+        },
+        logger(msg) {
+          expect(msg).to.equal('hi there');
+          done();
+        }
+      });
+      log('hi there');
+    });
+  });
   describe('no type', () => {
     it('should not output', () => {
       const oldMessage = lastMessage;
