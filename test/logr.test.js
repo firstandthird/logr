@@ -3,17 +3,23 @@
 const expect = require('chai').expect;
 const Logr = require('../');
 const path = require('path');
-describe('logr', () => {
-  let lastMessage = null;
 
-  beforeEach((done) => {
-    const originalConsole = console.log;
-    console.log = function(msg) { //eslint-disable-line
-      lastMessage = msg;
-      originalConsole.apply(null, arguments);
-    };
-    done();
-  });
+let lastMessage = null;
+
+//only overriding logger to clean up test output
+const logger = function(msg) {
+  lastMessage = msg;
+}
+
+beforeEach((done) => {
+  const originalConsole = console.log;
+  console.log = function(msg) { //eslint-disable-line
+    lastMessage = msg;
+    originalConsole.apply(null, arguments);
+  };
+  done();
+});
+describe('logr', () => {
   describe('init', () => {
     it('should return a function', () => {
       const log = new Logr();
@@ -45,12 +51,13 @@ describe('logr', () => {
 
   describe('console', () => {
     it('should output to console formatted', () => {
-      const log = new Logr();
+      const log = new Logr({ logger });
       log(['tag1', 'tag2'], 'message');
       expect(lastMessage).to.contain('[tag1,tag2] message');
     });
     it('allows you to specify a tag to trigger a ding', () => {
       const log = new Logr({
+        logger,
         renderOptions: {
           console: {
             consoleBell: ['error', 'ding']
@@ -62,6 +69,7 @@ describe('logr', () => {
     });
     it('will not ding if you do not use the tags', () => {
       const log = new Logr({
+        logger,
         renderOptions: {
           console: {
             consoleBell: ['error', 'ding']
@@ -73,6 +81,7 @@ describe('logr', () => {
     });
     it('allows you to disable all dings', () => {
       const log = new Logr({
+        logger,
         renderOptions: {
           console: {
             consoleBell: false
@@ -84,6 +93,7 @@ describe('logr', () => {
     });
     it('should allow disable timestamp', () => {
       const log = new Logr({
+        logger,
         renderOptions: {
           console: {
             timestamp: false
@@ -95,13 +105,13 @@ describe('logr', () => {
     });
 
     it('should stringify json', () => {
-      const log = new Logr({ renderOptions: { console: { timestamp: false } } });
+      const log = new Logr({ logger, renderOptions: { console: { timestamp: false } } });
       log(['tag1'], { message: 'hi there' });
       expect(lastMessage).to.equal('[tag1] {"message":"hi there"}');
     });
 
     it('should not think an object is an error', () => {
-      const log = new Logr({ renderOptions: { console: { timestamp: false } } });
+      const log = new Logr({ logger, renderOptions: { console: { timestamp: false } } });
       log(['tag1'], { message: 'hi there', name: 'bob' });
       expect(lastMessage).to.equal('[tag1] {"message":"hi there","name":"bob"}');
     });
@@ -110,13 +120,14 @@ describe('logr', () => {
       const circularObj = {};
       circularObj.circularRef = circularObj;
       circularObj.list = [circularObj, circularObj];
-      const log = new Logr({ renderOptions: { console: { timestamp: false } } });
+      const log = new Logr({ logger, renderOptions: { console: { timestamp: false } } });
       log(['tag1'], circularObj);
       expect(lastMessage).to.equal('[tag1] {"circularRef":"[Circular ~]","list":["[Circular ~]","[Circular ~]"]}');
     });
 
     it('should allow pretty printing json', () => {
       const log = new Logr({
+        logger,
         renderOptions: {
           console: {
             timestamp: false,
@@ -130,6 +141,7 @@ describe('logr', () => {
 
     it('should replace escaped newlines if pretty', () => {
       const log = new Logr({
+        logger,
         renderOptions: {
           console: {
             timestamp: false,
@@ -143,6 +155,7 @@ describe('logr', () => {
 
     it('should color tags', () => {
       const log = new Logr({
+        logger,
         renderOptions: {
           console: {
             timestamp: false,
@@ -158,6 +171,7 @@ describe('logr', () => {
     });
     it('should default color error, warn, notice', () => {
       const log = new Logr({
+        logger,
         renderOptions: {
           console: {
             timestamp: false,
@@ -170,6 +184,7 @@ describe('logr', () => {
     });
     it('should default color error, warning, notice', () => {
       const log = new Logr({
+        logger,
         renderOptions: {
           console: {
             timestamp: false,
@@ -183,6 +198,7 @@ describe('logr', () => {
 
     it('should allow to disable colors', () => {
       const log = new Logr({
+        logger,
         renderOptions: {
           console: {
             timestamp: false,
@@ -197,6 +213,7 @@ describe('logr', () => {
 
     it('should allow default tags to be set', () => {
       const log = new Logr({
+        logger,
         defaultTags: ['default'],
         renderOptions: {
           console: {
@@ -209,6 +226,7 @@ describe('logr', () => {
     });
     it('should let you optionally leave out the tags ', () => {
       const log = new Logr({
+        logger,
         defaultTags: ['default'],
         renderOptions: {
           console: {
@@ -223,6 +241,7 @@ describe('logr', () => {
     });
     it('should let you have no tags at all ', () => {
       const log = new Logr({
+        logger,
         renderOptions: {
           console: {
             timestamp: false
@@ -235,7 +254,7 @@ describe('logr', () => {
       expect(lastMessage).to.equal('{"test":123}');
     });
     it('should be able to accept an error instance', () => {
-      const log = new Logr({});
+      const log = new Logr({ logger });
       log(new Error('my error'));
       expect(lastMessage).to.include('[\u001b[41merror\u001b[0m]');
       expect(lastMessage).to.include('my error');
@@ -247,6 +266,7 @@ describe('logr', () => {
   describe('cli', () => {
     it('should default color error, warn, notice', () => {
       const log = new Logr({
+        logger,
         type: 'cli'
       });
       log(['error', 'warn', 'notice'], 'message');
@@ -254,6 +274,7 @@ describe('logr', () => {
     });
     it('should default color error, warning, notice', () => {
       const log = new Logr({
+        logger,
         type: 'cli'
       });
       log(['error', 'warning', 'notice'], 'message');
@@ -261,6 +282,7 @@ describe('logr', () => {
     });
     it('should ding on "error" tag by default', () => {
       const log = new Logr({
+        logger,
         type: 'cli',
       });
       log(['error', 'tag2', 'ding'], 'message with a ding added');
@@ -268,6 +290,7 @@ describe('logr', () => {
     });
     it('should be able to accept an error instance', () => {
       const log = new Logr({
+        logger,
         type: 'cli'
       });
       log(new Error('my error'));
@@ -278,6 +301,7 @@ describe('logr', () => {
     });
     it('should print correctly (indented, no timestamp, tags last)', () => {
       const log = new Logr({
+        logger,
         type: 'cli',
         renderOptions: {
           cli: {
@@ -292,6 +316,7 @@ describe('logr', () => {
     });
     it('should pretty-print objects correctly (indented, no timestamp, tags last)', () => {
       const log = new Logr({
+        logger,
         type: 'cli',
         renderOptions: {
           cli: {
@@ -306,6 +331,7 @@ describe('logr', () => {
     });
     it('should take in an optional color to color the whole line)', () => {
       const log = new Logr({
+        logger,
         type: 'cli',
         renderOptions: {
           cli: {
@@ -322,6 +348,7 @@ describe('logr', () => {
 
     it('should take in an optional prefix and color the prefix)', () => {
       const log = new Logr({
+        logger,
         type: 'cli',
         renderOptions: {
           cli: {
@@ -340,7 +367,7 @@ describe('logr', () => {
 
   describe('json', () => {
     it('should output to json formatted', () => {
-      const log = new Logr({ type: 'json' });
+      const log = new Logr({ logger, type: 'json' });
       log(['tag1', 'tag2'], 'message');
       expect(typeof lastMessage).to.equal('string');
       const jsonMessage = JSON.parse(lastMessage);
@@ -350,6 +377,7 @@ describe('logr', () => {
     });
     it('should output tags as objects if config set', () => {
       const log = new Logr({
+        logger,
         type: 'json',
         renderOptions: {
           json: {
@@ -365,7 +393,7 @@ describe('logr', () => {
       expect(jsonMessage.timestamp).to.exist;
     });
     it('should be able to accept an error instance', () => {
-      const log = new Logr({ type: 'json' });
+      const log = new Logr({ logger, type: 'json' });
       log(new Error('my error'));
       const jsonObject = JSON.parse(lastMessage);
       expect(jsonObject.tags).to.include('error');
@@ -375,6 +403,7 @@ describe('logr', () => {
     });
     it('should allow additional data to be logged', () => {
       const log = new Logr({
+        logger,
         type: 'json',
         renderOptions: {
           json: {
@@ -396,7 +425,7 @@ describe('logr', () => {
       const circularObj = {};
       circularObj.circularRef = circularObj;
       circularObj.list = [circularObj, circularObj];
-      const log = new Logr({ type: 'json' });
+      const log = new Logr({ logger, type: 'json' });
       log(['tag1'], circularObj);
     });
   });
@@ -404,7 +433,7 @@ describe('logr', () => {
   describe('env overrides', () => {
     it('should look at LOGR_TYPE to override type', () => {
       process.env.LOGR_TYPE = 'json';
-      const log = new Logr({ type: 'console' });
+      const log = new Logr({ logger, type: 'console' });
       log(['tag1'], 'message1');
       expect(lastMessage[0]).to.equal('{');
       delete process.env.LOGR_TYPE;
@@ -421,7 +450,7 @@ describe('logr', () => {
 
     it('should look at LOGR_FILTER to override filters', () => {
       process.env.LOGR_FILTER = 'tag1,tag2';
-      const log = new Logr({ type: 'console', renderOptions: { console: { timestamp: false } } });
+      const log = new Logr({ logger, type: 'console', renderOptions: { console: { timestamp: false } } });
       log(['tag1'], 'message1');
       expect(lastMessage).to.equal('[tag1] message1');
       log(['tag3'], 'message1');
@@ -432,7 +461,7 @@ describe('logr', () => {
 
   describe('filter', () => {
     it('should filter based on tags', () => {
-      const log = new Logr({ filter: ['tag1'], renderOptions: { console: { timestamp: false } } });
+      const log = new Logr({ logger, filter: ['tag1'], renderOptions: { console: { timestamp: false } } });
       log(['tag1'], 'message1');
       expect(lastMessage).to.equal('[tag1] message1');
       log(['tag2'], 'message2');
@@ -442,14 +471,14 @@ describe('logr', () => {
 
   describe('excludes', () => {
     it ('should exclude a specified tags', () => {
-      const log = new Logr({ exclude: 'tag1', renderOptions: { console: { timestamp: false } } });
+      const log = new Logr({ logger, exclude: 'tag1', renderOptions: { console: { timestamp: false } } });
       log(['tag1', 'tag2'], 'message1');
       expect(lastMessage).to.not.equal('[tag1,tag2] message1');
       log(['tag2', 'tag3'], 'message2');
       expect(lastMessage).to.equal('[tag2,tag3] message2');
     });
     it ('should exclude from a list of one or more specified tags', () => {
-      const log = new Logr({ exclude: ['tag1'], renderOptions: { console: { timestamp: false } } });
+      const log = new Logr({ logger, exclude: ['tag1'], renderOptions: { console: { timestamp: false } } });
       log(['tag1', 'tag2'], 'message1');
       expect(lastMessage).to.not.equal('[tag1,tag2] message1');
       log(['tag2', 'tag3'], 'message2');
@@ -462,6 +491,7 @@ describe('logr reporters', function() {
   it('can load a reporter from code', (done) => {
     const reporterCalls = {};
     const log = new Logr({
+      logger,
       type: 'anExampleReporter',
       renderOptions: {
         anExampleReporter: {
@@ -487,6 +517,7 @@ describe('logr reporters', function() {
   });
   it('can load a reporter with require ', (done) => {
     const log = new Logr({
+      logger,
       type: 'aSampleReporter',
       reporters: {
         aSampleReporter: path.join(__dirname, 'aSampleReporter.js')
@@ -509,6 +540,7 @@ describe('logr reporters', function() {
     let testData = false;
     let testOptions = false;
     const log = new Logr({
+      logger,
       reporters: {
         test: {
           render: (options, tags, data) => {
@@ -568,6 +600,7 @@ describe('logr reporters', function() {
       }
     };
     const log = new Logr({
+      logger,
       reporters: {
         test: reporter
       },
