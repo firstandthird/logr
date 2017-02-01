@@ -10,6 +10,8 @@ let defaults = {
       consoleBell: ['error'],
       timestamp: true,
       pretty: false,
+      flat: false,
+      flatColor: false,
       colors: {
         error: 'bgRed',
         warn: 'bgYellow',

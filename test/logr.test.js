@@ -153,6 +153,35 @@ describe('logr', () => {
       expect(lastMessage).to.equal('[tag1] {\n  "message": "hi\nthere"\n}');
     });
 
+    it('should allow a flat: true option to make json output better', () => {
+      const log = new Logr({
+        logger,
+        renderOptions: {
+          console: {
+            timestamp: false,
+            flat: true
+          }
+        }
+      });
+      log(['tag1'], { message: 'hi there', name: { first: 'bob', last: 'smith' } });
+      expect(lastMessage).to.equal('[tag1] message:hi there name.first:bob name.last:smith ');
+    });
+
+    it('should allow flat and flatColor: true', () => {
+      const log = new Logr({
+        logger,
+        renderOptions: {
+          console: {
+            timestamp: false,
+            flat: true,
+            flatColor: true
+          }
+        }
+      });
+      log(['tag1'], { message: 'hi there', name: { first: 'bob', last: 'smith' } });
+      expect(lastMessage).to.equal('[tag1] \u001b[90mmessage:\u001b[0mhi there \u001b[90mname.first:\u001b[0mbob \u001b[90mname.last:\u001b[0msmith ');
+    });
+
     it('should color tags', () => {
       const log = new Logr({
         logger,
