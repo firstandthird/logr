@@ -9,6 +9,7 @@ let lastMessage = null;
 //only overriding logger to clean up test output
 const logger = function(msg) {
   lastMessage = msg;
+  //console.warn(msg);
 }
 
 beforeEach((done) => {
@@ -53,7 +54,7 @@ describe('logr', () => {
     it('should output to console formatted', () => {
       const log = new Logr({ logger });
       log(['tag1', 'tag2'], 'message');
-      expect(lastMessage).to.contain('[tag1,tag2] message');
+      expect(lastMessage).to.contain('\u001b[39m\u001b[90m[\u001b[39m\u001b[90mtag1\u001b[39m\u001b[90m,\u001b[39m\u001b[90mtag2\u001b[39m\u001b[90m]\u001b[39m message');
     });
     it('allows you to specify a tag to trigger a ding', () => {
       const log = new Logr({
@@ -72,7 +73,8 @@ describe('logr', () => {
         logger,
         renderOptions: {
           console: {
-            consoleBell: ['error', 'ding']
+            consoleBell: ['error', 'ding'],
+            colors: false
           }
         }
       });
@@ -84,7 +86,8 @@ describe('logr', () => {
         logger,
         renderOptions: {
           console: {
-            consoleBell: false
+            consoleBell: false,
+            colors: false
           }
         }
       });
@@ -96,7 +99,8 @@ describe('logr', () => {
         logger,
         renderOptions: {
           console: {
-            timestamp: false
+            timestamp: false,
+            colors: false
           }
         }
       });
@@ -105,13 +109,13 @@ describe('logr', () => {
     });
 
     it('should stringify json', () => {
-      const log = new Logr({ logger, renderOptions: { console: { timestamp: false } } });
+      const log = new Logr({ logger, renderOptions: { console: { timestamp: false, colors: false } } });
       log(['tag1'], { message: 'hi there' });
       expect(lastMessage).to.equal('[tag1] {"message":"hi there"}');
     });
 
     it('should not think an object is an error', () => {
-      const log = new Logr({ logger, renderOptions: { console: { timestamp: false } } });
+      const log = new Logr({ logger, renderOptions: { console: { timestamp: false, colors: false } } });
       log(['tag1'], { message: 'hi there', name: 'bob' });
       expect(lastMessage).to.equal('[tag1] {"message":"hi there","name":"bob"}');
     });
@@ -120,7 +124,7 @@ describe('logr', () => {
       const circularObj = {};
       circularObj.circularRef = circularObj;
       circularObj.list = [circularObj, circularObj];
-      const log = new Logr({ logger, renderOptions: { console: { timestamp: false } } });
+      const log = new Logr({ logger, renderOptions: { console: { timestamp: false, colors: false } } });
       log(['tag1'], circularObj);
       expect(lastMessage).to.equal('[tag1] {"circularRef":"[Circular ~]","list":["[Circular ~]","[Circular ~]"]}');
     });
@@ -131,7 +135,8 @@ describe('logr', () => {
         renderOptions: {
           console: {
             timestamp: false,
-            pretty: true
+            pretty: true,
+            colors: false
           }
         }
       });
@@ -145,7 +150,8 @@ describe('logr', () => {
         renderOptions: {
           console: {
             timestamp: false,
-            pretty: true
+            pretty: true,
+            colors: false
           }
         }
       });
@@ -159,7 +165,8 @@ describe('logr', () => {
         renderOptions: {
           console: {
             timestamp: false,
-            flat: true
+            flat: true,
+            colors: false
           }
         }
       });
@@ -167,7 +174,7 @@ describe('logr', () => {
       expect(lastMessage).to.equal('[tag1] message:hi there name.first:bob name.last:smith ');
     });
 
-    it('should allow flat and flatColor: true', () => {
+    it('should color the keys if flat: true and color', () => {
       const log = new Logr({
         logger,
         renderOptions: {
@@ -179,7 +186,7 @@ describe('logr', () => {
         }
       });
       log(['tag1'], { message: 'hi there', name: { first: 'bob', last: 'smith' } });
-      expect(lastMessage).to.equal('[tag1] \u001b[90mmessage:\u001b[0mhi there \u001b[90mname.first:\u001b[0mbob \u001b[90mname.last:\u001b[0msmith ');
+      expect(lastMessage).to.equal('\u001b[90m[\u001b[39m\u001b[90mtag1\u001b[39m\u001b[90m]\u001b[39m \u001b[90mmessage:\u001b[39mhi there \u001b[90mname.first:\u001b[39mbob \u001b[90mname.last:\u001b[39msmith ');
     });
 
     it('should color tags', () => {
@@ -196,7 +203,7 @@ describe('logr', () => {
         }
       });
       log(['tag1'], 'message');
-      expect(lastMessage).to.equal('[\u001b[31mtag1\u001b[0m] message');
+      expect(lastMessage).to.equal('\u001b[90m[\u001b[39m\u001b[31mtag1\u001b[39m\u001b[90m]\u001b[39m message');
     });
     it('should default color error, warn, notice', () => {
       const log = new Logr({
@@ -209,7 +216,7 @@ describe('logr', () => {
         }
       });
       log(['error', 'warn', 'notice'], 'message');
-      expect(lastMessage).to.equal('[\u001b[41merror\u001b[0m,\u001b[43mwarn\u001b[0m,\u001b[44mnotice\u001b[0m] message\u0007');
+      expect(lastMessage).to.equal('\u001b[90m[\u001b[39m\u001b[41merror\u001b[49m\u001b[90m,\u001b[39m\u001b[43mwarn\u001b[49m\u001b[90m,\u001b[39m\u001b[44mnotice\u001b[49m\u001b[90m]\u001b[39m message\u0007');
     });
     it('should default color error, warning, notice', () => {
       const log = new Logr({
@@ -222,7 +229,7 @@ describe('logr', () => {
         }
       });
       log(['error', 'warning', 'notice'], 'message');
-      expect(lastMessage).to.equal('[\u001b[41merror\u001b[0m,\u001b[43mwarning\u001b[0m,\u001b[44mnotice\u001b[0m] message\u0007');
+      expect(lastMessage).to.equal('\u001b[90m[\u001b[39m\u001b[41merror\u001b[49m\u001b[90m,\u001b[39m\u001b[43mwarning\u001b[49m\u001b[90m,\u001b[39m\u001b[44mnotice\u001b[49m\u001b[90m]\u001b[39m message\u0007');
     });
 
     it('should allow to disable colors', () => {
@@ -246,7 +253,8 @@ describe('logr', () => {
         defaultTags: ['default'],
         renderOptions: {
           console: {
-            timestamp: false
+            timestamp: false,
+            colors: false
           }
         }
       });
@@ -259,7 +267,8 @@ describe('logr', () => {
         defaultTags: ['default'],
         renderOptions: {
           console: {
-            timestamp: false
+            timestamp: false,
+            colors: false
           }
         }
       });
@@ -273,7 +282,8 @@ describe('logr', () => {
         logger,
         renderOptions: {
           console: {
-            timestamp: false
+            timestamp: false,
+            colors: false
           }
         }
       });
@@ -285,7 +295,7 @@ describe('logr', () => {
     it('should be able to accept an error instance', () => {
       const log = new Logr({ logger });
       log(new Error('my error'));
-      expect(lastMessage).to.include('[\u001b[41merror\u001b[0m]');
+      expect(lastMessage).to.include('\u001b[39m\u001b[90m[\u001b[39m\u001b[41merror\u001b[49m');
       expect(lastMessage).to.include('my error');
       expect(lastMessage).to.include('Error: my error');
       expect(lastMessage).to.include('logr.test.js');
@@ -299,7 +309,7 @@ describe('logr', () => {
         type: 'cli'
       });
       log(['error', 'warn', 'notice'], 'message');
-      expect(lastMessage).to.equal('  message\u0007 (\u001b[41merror\u001b[0m,\u001b[43mwarn\u001b[0m,\u001b[44mnotice\u001b[0m)');
+      expect(lastMessage).to.equal('  message\u0007 \u001b[90m(\u001b[39m\u001b[41merror\u001b[49m\u001b[90m,\u001b[39m\u001b[43mwarn\u001b[49m\u001b[90m,\u001b[39m\u001b[44mnotice\u001b[49m\u001b[90m)\u001b[39m');
     });
     it('should default color error, warning, notice', () => {
       const log = new Logr({
@@ -307,7 +317,7 @@ describe('logr', () => {
         type: 'cli'
       });
       log(['error', 'warning', 'notice'], 'message');
-      expect(lastMessage).to.equal('  message\u0007 (\u001b[41merror\u001b[0m,\u001b[43mwarning\u001b[0m,\u001b[44mnotice\u001b[0m)');
+      expect(lastMessage).to.equal('  message\u0007 \u001b[90m(\u001b[39m\u001b[41merror\u001b[49m\u001b[90m,\u001b[39m\u001b[43mwarning\u001b[49m\u001b[90m,\u001b[39m\u001b[44mnotice\u001b[49m\u001b[90m)\u001b[39m');
     });
     it('should ding on "error" tag by default', () => {
       const log = new Logr({
@@ -323,7 +333,7 @@ describe('logr', () => {
         type: 'cli'
       });
       log(new Error('my error'));
-      expect(lastMessage).to.include('(\u001b[41merror\u001b[0m)');
+      expect(lastMessage).to.include('(\u001b[39m\u001b[41merror\u001b[49m\u001b[90m)\u001b[39m');
       expect(lastMessage).to.include('my error');
       expect(lastMessage).to.include('Error: my error');
       expect(lastMessage).to.include('logr.test.js');
@@ -341,7 +351,7 @@ describe('logr', () => {
         }
       });
       log(['tag1'], 'message');
-      expect(lastMessage).to.equal('  message (\u001b[31mtag1\u001b[0m)');
+      expect(lastMessage).to.equal('  message \u001b[90m(\u001b[39m\u001b[31mtag1\u001b[39m\u001b[90m)\u001b[39m');
     });
     it('should pretty-print objects correctly (indented, no timestamp, tags last)', () => {
       const log = new Logr({
@@ -356,7 +366,7 @@ describe('logr', () => {
         }
       });
       log(['tag1'], { message: 123 });
-      expect(lastMessage).to.equal('  {\n  "message": 123\n} (\u001b[31mtag1\u001b[0m)');
+      expect(lastMessage).to.equal('  {\n  "message": 123\n} \u001b[90m(\u001b[39m\u001b[31mtag1\u001b[39m\u001b[90m)\u001b[39m');
     });
     it('should take in an optional color to color the whole line)', () => {
       const log = new Logr({
@@ -372,7 +382,7 @@ describe('logr', () => {
         }
       });
       log(['tag1'], 'message');
-      expect(lastMessage).to.equal('  \x1b[42mmessage\x1b[0m (\u001b[31mtag1\u001b[0m)');
+      expect(lastMessage).to.equal('  \u001b[42mmessage\u001b[49m \u001b[90m(\u001b[39m\u001b[31mtag1\u001b[39m\u001b[90m)\u001b[39m');
     });
 
     it('should take in an optional prefix and color the prefix)', () => {
@@ -390,7 +400,7 @@ describe('logr', () => {
         }
       });
       log(['tag1'], 'message');
-      expect(lastMessage).to.equal('\u001b[42mapp | \u001b[0mmessage (\u001b[31mtag1\u001b[0m)');
+      expect(lastMessage).to.equal('\u001b[42mapp | \u001b[49mmessage \u001b[90m(\u001b[39m\u001b[31mtag1\u001b[39m\u001b[90m)\u001b[39m');
     });
   });
 
@@ -479,7 +489,7 @@ describe('logr', () => {
 
     it('should look at LOGR_FILTER to override filters', () => {
       process.env.LOGR_FILTER = 'tag1,tag2';
-      const log = new Logr({ logger, type: 'console', renderOptions: { console: { timestamp: false } } });
+      const log = new Logr({ logger, type: 'console', renderOptions: { console: { timestamp: false, colors: false } } });
       log(['tag1'], 'message1');
       expect(lastMessage).to.equal('[tag1] message1');
       log(['tag3'], 'message1');
@@ -490,7 +500,7 @@ describe('logr', () => {
 
   describe('filter', () => {
     it('should filter based on tags', () => {
-      const log = new Logr({ logger, filter: ['tag1'], renderOptions: { console: { timestamp: false } } });
+      const log = new Logr({ logger, filter: ['tag1'], renderOptions: { console: { timestamp: false, colors: false } } });
       log(['tag1'], 'message1');
       expect(lastMessage).to.equal('[tag1] message1');
       log(['tag2'], 'message2');
@@ -500,14 +510,14 @@ describe('logr', () => {
 
   describe('excludes', () => {
     it ('should exclude a specified tags', () => {
-      const log = new Logr({ logger, exclude: 'tag1', renderOptions: { console: { timestamp: false } } });
+      const log = new Logr({ logger, exclude: 'tag1', renderOptions: { console: { timestamp: false, colors: false } } });
       log(['tag1', 'tag2'], 'message1');
       expect(lastMessage).to.not.equal('[tag1,tag2] message1');
       log(['tag2', 'tag3'], 'message2');
       expect(lastMessage).to.equal('[tag2,tag3] message2');
     });
     it ('should exclude from a list of one or more specified tags', () => {
-      const log = new Logr({ logger, exclude: ['tag1'], renderOptions: { console: { timestamp: false } } });
+      const log = new Logr({ logger, exclude: ['tag1'], renderOptions: { console: { timestamp: false, colors: false } } });
       log(['tag1', 'tag2'], 'message1');
       expect(lastMessage).to.not.equal('[tag1,tag2] message1');
       log(['tag2', 'tag3'], 'message2');
