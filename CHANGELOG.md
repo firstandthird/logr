@@ -1,4 +1,11 @@
 
+1.17.0 / 2017-02-01
+==================
+
+  * refactored to use chalk for colors. wrap unimportant characters in gray
+  * added flat option to console logger
+  * chore(package): update dependencies
+
 1.16.0 / 2016-11-24
 ==================
 
