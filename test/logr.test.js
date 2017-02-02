@@ -216,7 +216,7 @@ describe('logr', () => {
         }
       });
       log(['error', 'warn', 'notice'], 'message');
-      expect(lastMessage).to.equal('\u001b[90m[\u001b[39m\u001b[41merror\u001b[49m\u001b[90m,\u001b[39m\u001b[43mwarn\u001b[49m\u001b[90m,\u001b[39m\u001b[44mnotice\u001b[49m\u001b[90m]\u001b[39m message\u0007');
+      expect(lastMessage).to.equal('\u001b[90m[\u001b[39m\u001b[31merror\u001b[39m\u001b[90m,\u001b[39m\u001b[33mwarn\u001b[39m\u001b[90m,\u001b[39m\u001b[34mnotice\u001b[39m\u001b[90m]\u001b[39m message\u0007');
     });
     it('should default color error, warning, notice', () => {
       const log = new Logr({
@@ -229,7 +229,7 @@ describe('logr', () => {
         }
       });
       log(['error', 'warning', 'notice'], 'message');
-      expect(lastMessage).to.equal('\u001b[90m[\u001b[39m\u001b[41merror\u001b[49m\u001b[90m,\u001b[39m\u001b[43mwarning\u001b[49m\u001b[90m,\u001b[39m\u001b[44mnotice\u001b[49m\u001b[90m]\u001b[39m message\u0007');
+      expect(lastMessage).to.equal('\u001b[90m[\u001b[39m\u001b[31merror\u001b[39m\u001b[90m,\u001b[39m\u001b[33mwarning\u001b[39m\u001b[90m,\u001b[39m\u001b[34mnotice\u001b[39m\u001b[90m]\u001b[39m message\u0007');
     });
 
     it('should allow to disable colors', () => {
@@ -295,7 +295,7 @@ describe('logr', () => {
     it('should be able to accept an error instance', () => {
       const log = new Logr({ logger });
       log(new Error('my error'));
-      expect(lastMessage).to.include('\u001b[39m\u001b[90m[\u001b[39m\u001b[41merror\u001b[49m');
+      expect(lastMessage).to.include('\u001b[90m[\u001b[39m\u001b[31merror\u001b[39m');
       expect(lastMessage).to.include('my error');
       expect(lastMessage).to.include('Error: my error');
       expect(lastMessage).to.include('logr.test.js');
@@ -309,7 +309,7 @@ describe('logr', () => {
         type: 'cli'
       });
       log(['error', 'warn', 'notice'], 'message');
-      expect(lastMessage).to.equal('  message\u0007 \u001b[90m(\u001b[39m\u001b[41merror\u001b[49m\u001b[90m,\u001b[39m\u001b[43mwarn\u001b[49m\u001b[90m,\u001b[39m\u001b[44mnotice\u001b[49m\u001b[90m)\u001b[39m');
+      expect(lastMessage).to.equal('  message\u0007 \u001b[90m(\u001b[39m\u001b[31merror\u001b[39m\u001b[90m,\u001b[39m\u001b[33mwarn\u001b[39m\u001b[90m,\u001b[39m\u001b[34mnotice\u001b[39m\u001b[90m)\u001b[39m');
     });
     it('should default color error, warning, notice', () => {
       const log = new Logr({
@@ -317,7 +317,7 @@ describe('logr', () => {
         type: 'cli'
       });
       log(['error', 'warning', 'notice'], 'message');
-      expect(lastMessage).to.equal('  message\u0007 \u001b[90m(\u001b[39m\u001b[41merror\u001b[49m\u001b[90m,\u001b[39m\u001b[43mwarning\u001b[49m\u001b[90m,\u001b[39m\u001b[44mnotice\u001b[49m\u001b[90m)\u001b[39m');
+      expect(lastMessage).to.equal('  message\u0007 \u001b[90m(\u001b[39m\u001b[31merror\u001b[39m\u001b[90m,\u001b[39m\u001b[33mwarning\u001b[39m\u001b[90m,\u001b[39m\u001b[34mnotice\u001b[39m\u001b[90m)\u001b[39m');
     });
     it('should ding on "error" tag by default', () => {
       const log = new Logr({
@@ -333,7 +333,7 @@ describe('logr', () => {
         type: 'cli'
       });
       log(new Error('my error'));
-      expect(lastMessage).to.include('(\u001b[39m\u001b[41merror\u001b[49m\u001b[90m)\u001b[39m');
+      expect(lastMessage).to.include('(\u001b[39m\u001b[31merror\u001b[39m\u001b[90m)\u001b[39m');
       expect(lastMessage).to.include('my error');
       expect(lastMessage).to.include('Error: my error');
       expect(lastMessage).to.include('logr.test.js');

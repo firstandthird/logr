@@ -13,10 +13,10 @@ let defaults = {
       flat: false,
       flatColor: false,
       colors: {
-        error: 'bgRed',
-        warn: 'bgYellow',
-        warning: 'bgYellow',
-        notice: 'bgBlue'
+        error: 'red',
+        warn: 'yellow',
+        warning: 'yellow',
+        notice: 'blue'
       }
     },
     json: {
@@ -27,10 +27,10 @@ let defaults = {
       consoleBell: ['error'],
       pretty: true,
       colors: {
-        error: 'bgRed',
-        warn: 'bgYellow',
-        warning: 'bgYellow',
-        notice: 'bgBlue'
+        error: 'red',
+        warn: 'yellow',
+        warning: 'yellow',
+        notice: 'blue'
       }
     }
   }
