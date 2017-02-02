@@ -1,7 +1,7 @@
 {
   "name": "logr",
   "description": "a simple logger/debugger",
-  "version": "1.17.0",
+  "version": "1.18.0",
   "homepage": "https://github.com/firstandthird/logr",
   "repository": {
     "type": "git",
