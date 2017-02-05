@@ -8,7 +8,7 @@ let defaults = {
   renderOptions: {
     console: {
       consoleBell: ['error'],
-      timestamp: true,
+      timestamp: 'HH:mm:ss',
       pretty: false,
       flat: false,
       flatColor: false,

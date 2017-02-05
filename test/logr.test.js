@@ -54,7 +54,7 @@ describe('logr', () => {
     it('should output to console formatted', () => {
       const log = new Logr({ logger });
       log(['tag1', 'tag2'], 'message');
-      expect(lastMessage).to.contain('\u001b[39m\u001b[90m[\u001b[39m\u001b[90mtag1\u001b[39m\u001b[90m,\u001b[39m\u001b[90mtag2\u001b[39m\u001b[90m]\u001b[39m message');
+      expect(lastMessage).to.contain('\u001b[90m[\u001b[39m\u001b[90mtag1\u001b[39m\u001b[90m,\u001b[39m\u001b[90mtag2\u001b[39m\u001b[90m]\u001b[39m message');
     });
     it('allows you to specify a tag to trigger a ding', () => {
       const log = new Logr({
@@ -93,6 +93,20 @@ describe('logr', () => {
       });
       log(['tag1', 'tag2', 'error'], 'message with a ding added');
       expect(lastMessage).to.not.contain('\u0007');
+    });
+    it('should allow custom format for timestamp', () => {
+      const log = new Logr({
+        logger,
+        renderOptions: {
+          console: {
+            timestamp: 'YYYY',
+            colors: false
+          }
+        }
+      });
+      log(['tag1', 'tag2'], 'message');
+      const year = new Date().getFullYear();
+      expect(lastMessage).to.equal(`${year} [tag1,tag2] message`);
     });
     it('should allow disable timestamp', () => {
       const log = new Logr({
