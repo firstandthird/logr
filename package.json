@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "eslint": "3.12.2",
+    "eslint": "3.14.1",
     "eslint-config-firstandthird": "3.1.0",
     "eslint-plugin-import": "2.2.0",
     "mocha": "^3.2.0"
