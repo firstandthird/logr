@@ -1,173 +1,190 @@
 'use strict';
 
-const _ = require('lodash');
+const aug = require('aug');
+const intersection = require('lodash.intersection');
+
 let defaults = {
-  type: 'console',
-  filter: null,
+  filter: [],
+  exclude: [],
   defaultTags: [],
-  renderOptions: {
-    console: {
-      consoleBell: ['error'],
-      timestamp: 'HH:mm:ss',
-      pretty: false,
-      flat: false,
-      flatColor: false,
-      colors: {
-        error: 'red',
-        warn: 'yellow',
-        warning: 'yellow',
-        notice: 'blue'
-      }
-    },
-    json: {
-      tagsObject: false,
-      additional: {}
-    },
-    cli: {
-      consoleBell: ['error'],
-      pretty: true,
-      colors: {
-        error: 'red',
-        warn: 'yellow',
-        warning: 'yellow',
-        notice: 'blue'
-      }
-    }
+  logger: null,
+  reporters: null,
+  reporterDefaults: {
+    filter: [],
+    exclude: []
   }
 };
 
 class Logger {
   constructor(options) {
-    if (options && options.setDefaults) {
-      defaults = _.defaultsDeep(options, defaults);
-    }
-    this.config = _.defaultsDeep(options, defaults);
-    this.renderers = {
-      console: require('./lib/console'),
-      json: require('./lib/json'),
-      cli: require('./lib/cli'),
-    };
-    if (this.config.reporters) {
-      _.each(options.reporters, (renderFunction, renderName) => {
-        if (typeof renderFunction === 'string') {
-          renderFunction = require(renderFunction);
-        }
-        if (typeof renderFunction === 'function') {
-          this.renderers[renderName] = renderFunction;
-        } else {
-          // if the reporter has a 'register' method, register it:
-          if (renderFunction.register) {
-            renderFunction.register(this.config.renderOptions[renderName], (err) => {
-              if (err) {
-                throw err;
-              }
-            });
-          }
-          // if the reporter defines a 'render' method, make it available:
-          if (renderFunction.render) {
-            this.renderers[renderName] = renderFunction.render;
-          }
-        }
-      });
-    }
-    // list of keys of renderers to use:
-    this.activeRenderers = [];
-    this.activeFilters = {};
-    if (options && options.type === false) {
-      this.config.type = false;
-    }
+    this.config = aug('defaults', defaults, options);
 
-    if (process.env.LOGR_TYPE) {
-      this.config.type = process.env.LOGR_TYPE;
-      //env vars come in as strings
-      if (this.config.type === 'false') {
-        this.config.type = false;
-      }
-    }
-
+    //override filter with env vars
     if (process.env.LOGR_FILTER) {
       this.config.filter = process.env.LOGR_FILTER.split(',');
     }
-    // make sure all 'types' are set up:
-    if (this.config.type !== false) {
-      // type could be specified by a single string:
-      if (typeof this.config.type === 'string') {
-        this.config.type = [this.config.type];
-      }
-      this.config.type.forEach((type) => {
-        if (typeof type === 'string') {
-          if (!this.renderers[type]) {
-            throw new Error('invalid type');
-          }
-          this.activeRenderers.push(type);
-        } else {
-          if (!this.renderers[type.reporter]) {
-            throw new Error('invalid type');
-          }
-          this.activeRenderers.push(type.reporter);
-          this.activeFilters[type.reporter] = type.filter;
-        }
-      });
+    //override exclude with env vars
+    if (process.env.LOGR_EXCLUDE) {
+      this.config.exclude = process.env.LOGR_EXCLUDE.split(',');
     }
+
+    //be able to override core logger
     if (this.config.logger) {
       this.logger = this.config.logger;
     }
-
-    return this.log.bind(this);
+    this.reporters = {};
+    this.setupReporters();
   }
 
-  filterMatch(filter, tags) {
-    if (filter === null) {
-      return true;
+  setupReporters() {
+    //if no reporters, default to the basic console
+    if (!this.config.reporters) {
+      this.config.reporters = {
+        console: {
+          reporter: require('./lib/console'),
+          options: {}
+        }
+      }
     }
-    return filter.some((filterTag) => {
-      return tags.indexOf(filterTag) !== -1;
-    });
+    //loop through all reporters and make sure they are valid
+    Object.keys(this.config.reporters).forEach((reporterName) => this.setupReporter(reporterName));
+  }
+
+  setupReporter(key) {
+    /*
+     * Reporter structure
+     *
+     * OPTION 1
+     *
+     * exports.defaults = {
+     * }
+     *
+     * exports.log = function(options, tags, message) {
+     * }
+     *
+     *
+     * OPTION 2 - if no options, then can just do 
+     *
+     * module.exports = function(options, tags, message) {
+     * }
+     */
+
+    /*
+     * Loading Reporters
+     *
+     * reporters: {
+     *   name: {
+     *     reporter: require('path/to/reporter'),
+     *     options: {
+     *       project level options
+     *     }
+     *   },
+     *   shorthand(options, tags, message) {
+     *
+     *   }
+     */
+
+    let reporterObj = this.config.reporters[key];
+
+    //support shorthand of just a simple function
+    if (typeof reporterObj === 'function') {
+      reporterObj = {
+        reporter: reporterObj
+      }
+    }
+
+    if (!reporterObj.reporter) {
+      throw new Error('reporters must be registered with { reporter, options }');
+    }
+
+    //support for shorthand version with no defaults
+    if (typeof reporterObj.reporter === 'function') {
+      reporterObj.reporter = {
+        log: reporterObj.reporter,
+        options: {}
+      }
+    }
+
+    //make sure reporter log is a function
+    if (typeof reporterObj.reporter.log !== 'function') {
+      throw new Error('log must be a function');
+    }
+
+    //merge logr reporter defaults, defaults defined by reporter and options passed in
+    reporterObj.options = aug(
+      {},
+      this.config.reporterDefaults,
+      reporterObj.reporter.defaults || {},
+      reporterObj.options || {}
+    );
+
+    //copy global filters into each reporter so only have to check one place
+    //TODO switch to a lodash merge so dupes don't show up
+    reporterObj.options.filter = reporterObj.options.filter.concat(this.config.filter);
+    reporterObj.options.exclude = reporterObj.options.exclude.concat(this.config.exclude);
+
+    this.reporters[key] = reporterObj;
   }
 
   log(tags, message) {
+    //tags are optional
     if (arguments.length === 1) {
       message = tags;
       tags = [];
     }
-    if (this.config.exclude) {
-      // exclude can be either a string or a list of strings:
-      if (typeof this.config.exclude === 'string') {
-        if (tags.indexOf(this.config.exclude) > -1) {
-          return;
-        }
-      } else if (_.intersection(this.config.exclude, tags).length > 0) {
-        return;
-      }
-    }
-    if (!this.config.type || this.config.type.length === 0) {
-      return;
-    }
-    if (!this.filterMatch(this.config.filter, tags)) {
-      return;
-    }
+
+    //if message is an error, turn it into a pretty object because Errors aren't json.stringifiable
     if (message instanceof Error) {
       message = {
         message: message.message,
         stack: message.stack
       };
+      //auto add error tag if its an error
       if (tags.indexOf('error') < 0) {
         tags.push('error');
       }
     }
-    tags = this.config.defaultTags.concat(tags);
-    this.activeRenderers.forEach((type) => {
-      const renderer = this.renderers[type];
-      if (this.activeFilters[type] === undefined || this.filterMatch(tags, this.activeFilters[type])) {
-        const out = renderer(this.config.renderOptions[type], tags, message);
-        this.logger(out);
-      }
-    });
+    if (this.config.defaultTags.length !== 0) {
+      tags = this.config.defaultTags.concat(tags);
+    }
+    Object.keys(this.reporters).forEach((name) => this.reporterLog(name, tags, message));
+  }
+
+  reporterLog(reporterName, tags, message) {
+    const reporterObj = this.reporters[reporterName];
+    const options = reporterObj.options;
+
+    //reporters can be disabled on the option level
+    if (options.enabled === false) {
+      return;
+    }
+    //if there are filters and it doesn't match, stop here
+    if (options.filter.length !== 0 && intersection(options.filter, tags).length === 0) {
+      return;
+    }
+    //if there are excludes and they match, stop here
+    if (options.exclude.length !== 0 && intersection(options.exclude, tags).length > 0) {
+      return;
+    }
+    //pass in the options, tag and message to reporter
+    const out = reporterObj.reporter.log(reporterObj.options, tags, message);
+
+    //check if anything meaningful was returned
+    if (!out) {
+      return
+    }
+    //pass ouput string to logger
+    this.logger(out);
   }
 
   logger(msg) {
     console.log(msg); //eslint-disable-line no-console
   }
+}
+
+Logger.createLogger = function(options) {
+  const logr = new Logger(options);
+  return logr.log.bind(logr);
 }
 
 module.exports = Logger;
