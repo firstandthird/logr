@@ -1,9 +1,26 @@
+'use strict';
 const test = require('tap').test;
 const Logr = require('../');
 
+test('reporter - allow strings to load reporters', (t) => {
+  const logr = new Logr({
+    logger(msg) {
+      t.equals(msg, '[tag] hi');
+      t.end();
+    },
+    reporters: {
+      test: {
+        reporter: './lib/console',
+        options: {
+          timestamp: false
+        }
+      }
+    }
+  });
+  logr.log(['tag'], 'hi');
+});
 
 test('reporter - log what reporter returns', (t) => {
-  let check = false
   const logr = new Logr({
     logger(msg) {
       t.equals(msg, 'hi');
@@ -19,7 +36,7 @@ test('reporter - log what reporter returns', (t) => {
 });
 
 test('reporter - dont log if reporter returns nothing', (t) => {
-  let check = false
+  let check = false;
   const logr = new Logr({
     logger(msg) {
       check = true;

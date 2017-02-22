@@ -9,7 +9,7 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "test": "tap test/*.test.js --cov -R spec",
+    "test": "npm run lint && tap test/*.test.js --cov -R spec",
     "cov": "tap test/*.test.js --cov --coverage-report=lcov"
   },
   "dependencies": {

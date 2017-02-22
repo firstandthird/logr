@@ -1,8 +1,5 @@
 const test = require('tap').test;
-
 const Logr = require('../');
-
-
 
 test('log - tags optional', (t) => {
   const logr = new Logr({

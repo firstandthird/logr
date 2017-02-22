@@ -3,7 +3,7 @@
 const aug = require('aug');
 const intersection = require('lodash.intersection');
 
-let defaults = {
+const defaults = {
   filter: [],
   exclude: [],
   defaultTags: [],
@@ -44,7 +44,7 @@ class Logger {
           reporter: require('./lib/console'),
           options: {}
         }
-      }
+      };
     }
     //loop through all reporters and make sure they are valid
     Object.keys(this.config.reporters).forEach((reporterName) => this.setupReporter(reporterName));
@@ -63,7 +63,7 @@ class Logger {
      * }
      *
      *
-     * OPTION 2 - if no options, then can just do 
+     * OPTION 2 - if no options, then can just do
      *
      * module.exports = function(options, tags, message) {
      * }
@@ -90,11 +90,16 @@ class Logger {
     if (typeof reporterObj === 'function') {
       reporterObj = {
         reporter: reporterObj
-      }
+      };
     }
 
     if (!reporterObj.reporter) {
       throw new Error('reporters must be registered with { reporter, options }');
+    }
+
+    //pass in a string and then require it
+    if (typeof reporterObj.reporter === 'string') {
+      reporterObj.reporter = require(reporterObj.reporter);
     }
 
     //support for shorthand version with no defaults
@@ -102,7 +107,7 @@ class Logger {
       reporterObj.reporter = {
         log: reporterObj.reporter,
         options: {}
-      }
+      };
     }
 
     //make sure reporter log is a function
@@ -171,7 +176,7 @@ class Logger {
 
     //check if anything meaningful was returned
     if (!out) {
-      return
+      return;
     }
     //pass ouput string to logger
     this.logger(out);
@@ -185,6 +190,6 @@ class Logger {
 Logger.createLogger = function(options) {
   const logr = new Logger(options);
   return logr.log.bind(logr);
-}
+};
 
 module.exports = Logger;

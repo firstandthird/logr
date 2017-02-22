@@ -1,15 +1,14 @@
 const test = require('tap').test;
-
 const Logr = require('../');
 
 test('logger defaults to console.log', (t) => {
-  const oldConsole = console.log;
-  console.log = function(msg) {
+  const oldConsole = console.log; //eslint-disable-line no-console
+  console.log = function(msg) { //eslint-disable-line no-console
     t.equals(msg, 'test');
-  }
+  };
   const logr = new Logr();
   logr.logger('test');
-  console.log = oldConsole;
+  console.log = oldConsole; //eslint-disable-line no-console
   t.end();
 });
 
@@ -32,7 +31,7 @@ test('defaults to console reporter if none passed in', (t) => {
 
 test('setup reporter - need reporter key', (t) => {
   t.throws(() => {
-    const logr = new Logr({
+    new Logr({
       filter: ['test'],
       reporters: {
         test: {}
@@ -88,7 +87,7 @@ test('setup reporter', (t) => {
 
 test('setup reporter - log must be function', (t) => {
   t.throws(() => {
-    const logr = new Logr({
+    new Logr({
       filter: ['test'],
       reporters: {
         test: {
