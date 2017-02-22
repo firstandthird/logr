@@ -13,12 +13,12 @@
     "cov": "tap test/*.test.js --cov --coverage-report=lcov"
   },
   "dependencies": {
-    "aug": "^1.0.2",
-    "lodash.intersection": "^4.4.0"
+    "aug": "1.0.2",
+    "lodash.intersection": "4.4.0"
   },
   "devDependencies": {
-    "eslint": "3.12.2",
-    "eslint-config-firstandthird": "3.1.0",
+    "eslint": "3.16.1",
+    "eslint-config-firstandthird": "3.3.0",
     "eslint-plugin-import": "2.2.0",
     "tap": "^10.2.0"
   },
