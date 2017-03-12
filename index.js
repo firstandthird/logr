@@ -5,6 +5,8 @@ const intersection = require('lodash.intersection');
 
 const defaults = {
   filter: [],
+  unhandledRejection: false,
+  uncaughtException: false,
   exclude: [],
   defaultTags: [],
   logger: null,
@@ -31,6 +33,20 @@ class Logger {
     //be able to override core logger
     if (this.config.logger) {
       this.logger = this.config.logger;
+    }
+
+    if (this.config.unhandledRejection) {
+      process.on('unhandledRejection', (reason) => {
+        this.log(['promise', 'error'], reason);
+        process.exit(1);
+      });
+    }
+
+    if (this.config.uncaughtException) {
+      process.on('uncaughtException', (err) => {
+        this.log(['exception', 'error'], err);
+        process.exit(1);
+      });
     }
     this.reporters = {};
     this.setupReporters();
