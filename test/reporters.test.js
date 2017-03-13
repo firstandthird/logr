@@ -119,6 +119,36 @@ test('log - multiple reporters', (t) => {
   t.end();
 });
 
+test('log - clone tags so reporters cant muck with them', (t) => {
+  const logr = new Logr({
+    reporters: {
+      test(options, tags, message) {
+        tags[0] = 'muck';
+      },
+      test2(options, tags, message) {
+        t.equal(tags[0], 'debug');
+      }
+    }
+  });
+  logr.log(['debug'], '1');
+  t.end();
+});
+
+test('log - clone message so reporters cant muck with them', (t) => {
+  const logr = new Logr({
+    reporters: {
+      test(options, tags, message) {
+        message.run++;
+      },
+      test2(options, tags, message) {
+        t.equal(message.run, 1);
+      }
+    }
+  });
+  logr.log(['debug'], { run: 1 });
+  t.end();
+});
+
 test('log - disable reporter', (t) => {
   let count = 0;
   const logr = new Logr({

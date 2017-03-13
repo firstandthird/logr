@@ -168,7 +168,10 @@ class Logger {
     if (this.config.defaultTags.length !== 0) {
       tags = this.config.defaultTags.concat(tags);
     }
-    Object.keys(this.reporters).forEach((name) => this.reporterLog(name, tags, message));
+    Object.keys(this.reporters).forEach((name) => {
+      const messageClone = (typeof message === 'object') ? aug({}, message) : message;
+      this.reporterLog(name, tags.slice(0), messageClone);
+    });
   }
 
   reporterLog(reporterName, tags, message) {
