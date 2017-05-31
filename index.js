@@ -13,9 +13,9 @@ const defaults = {
   reporters: null,
   reporterDefaults: {
     filter: [],
+    throttle: {},
     exclude: []
   },
-  rateLimit: {}
 };
 
 class Logger {
@@ -175,15 +175,6 @@ class Logger {
     });
   }
 
-  getMatchingRateDirective(tags) {
-    for (let i = 0; i < this.config.rateLimit.length; i++) {
-      const rateItem = this.config.rateLimit[i];
-      if (intersection(rateItem.tags, tags).length === rateItem.tags.length) {
-        return rateItem;
-      }
-    }
-  }
-
   reporterLog(reporterName, tags, message) {
     const reporterObj = this.reporters[reporterName];
     const options = reporterObj.options;
@@ -200,14 +191,12 @@ class Logger {
     if (options.exclude.length !== 0 && intersection(options.exclude, tags).length > 0) {
       return;
     }
-
-    // check if it matches any rate-limit directives:
-    const rateDirective = this.getMatchingRateDirective(tags);
-    if (rateDirective) {
-      const tagKey = tags.join('');
+    // if throttling was specified then throttle log rate:
+    if (Object.keys(options.throttle).length > 0) {
+      const tagKey = options.throttle.throttleBasedOnTags ? tags.join('') : 'all';
       const curTime = new Date().getTime();
       if (this.rateLimits[tagKey]) {
-        if (curTime - this.rateLimits[tagKey] < rateDirective.rate) {
+        if (curTime - this.rateLimits[tagKey] < options.throttle.rate) {
           return;
         }
       }
