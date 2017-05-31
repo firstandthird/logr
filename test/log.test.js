@@ -130,7 +130,7 @@ test('log - rate limit all calls to log', (t) => {
           invocationCount++;
         },
         options: {
-          throttle: { rate: 1000 }
+          throttle: 1000
         }
       }
     }
@@ -162,7 +162,8 @@ test('log - rate limit by tag signature', (t) => {
           invocationCount++;
         },
         options: {
-          throttle: { throttleBasedOnTags: true, rate: 1000 }
+          throttle: 1000,
+          throttleBasedOnTags: true
         }
       }
     }

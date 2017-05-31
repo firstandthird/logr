@@ -13,9 +13,10 @@ const defaults = {
   reporters: null,
   reporterDefaults: {
     filter: [],
-    throttle: {},
+    throttle: false,
+    throttleBasedOnTags: false,
     exclude: []
-  },
+  }
 };
 
 class Logger {
@@ -192,11 +193,11 @@ class Logger {
       return;
     }
     // if throttling was specified then throttle log rate:
-    if (Object.keys(options.throttle).length > 0) {
-      const tagKey = options.throttle.throttleBasedOnTags ? tags.join('') : 'all';
+    if (options.throttle) {
+      const tagKey = options.throttleBasedOnTags ? tags.join('') : 'all';
       const curTime = new Date().getTime();
       if (this.rateLimits[tagKey]) {
-        if (curTime - this.rateLimits[tagKey] < options.throttle.rate) {
+        if (curTime - this.rateLimits[tagKey] < options.throttle) {
           return;
         }
       }
