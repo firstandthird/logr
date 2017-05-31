@@ -120,3 +120,67 @@ test('log - default tags', (t) => {
   });
   logr.log(['debug'], '1');
 });
+
+test('log - rate limit all calls to log', (t) => {
+  let invocationCount = 0;
+  const logr = new Logr({
+    reporters: {
+      test: {
+        reporter: (options, tags, message) => {
+          invocationCount++;
+        },
+        options: {
+          throttle: 1000
+        }
+      }
+    }
+  });
+  logr.log(['s1', 'tag1', 'tag2'], 'test');
+  logr.log(['s2', 'tag1', 'tag2'], 'test');
+  logr.log(['s2', 'tag1'], 'test');
+  setTimeout(() => {
+    logr.log(['s1', 'tag1', 'tag2'], 'test');
+    logr.log(['s2', 'tag1', 'tag2'], 'test');
+    logr.log(['s2', 'tag1'], 'test');
+    setTimeout(() => {
+      logr.log(['s1', 'tag1', 'tag2'], 'test');
+      logr.log(['s2', 'tag1', 'tag2'], 'test');
+      logr.log(['s2', 'tag1'], 'test');
+      t.equal(invocationCount, 2);
+      t.end();
+    }, 1000);
+  }, 500);
+});
+
+test('log - rate limit by tag signature', (t) => {
+  let invocationCount = 0;
+  const logr = new Logr({
+    throttle: { throttleBasedOnTags: true, rate: 1000 },
+    reporters: {
+      test: {
+        reporter: (options, tags, message) => {
+          invocationCount++;
+        },
+        options: {
+          throttle: 1000,
+          throttleBasedOnTags: true
+        }
+      }
+    }
+  });
+  logr.log(['s1', 'tag1', 'tag2'], 'test');
+  logr.log(['s2', 'tag1', 'tag2'], 'test');
+  logr.log(['s2', 'tag1'], 'test');
+  setTimeout(() => {
+    logr.log(['s1', 'tag1', 'tag2'], 'test');
+    logr.log(['s2', 'tag1', 'tag2'], 'test');
+    logr.log(['s2', 'tag1'], 'test');
+    setTimeout(() => {
+      logr.log(['s1', 'tag1', 'tag2'], 'test');
+      logr.log(['s2', 'tag1', 'tag2'], 'test');
+      logr.log(['s2', 'tag1'], 'test');
+      t.equal(invocationCount, 6);
+      t.end();
+    }, 1000);
+  }, 500);
+});

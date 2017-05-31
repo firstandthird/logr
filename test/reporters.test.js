@@ -63,7 +63,9 @@ test('reporter - default options', (t) => {
             t.deepEqual(options, {
               filter: [],
               exclude: [],
-              test: true
+              test: true,
+              throttle: false,
+              throttleBasedOnTags: false
             });
             t.end();
           }
@@ -89,6 +91,8 @@ test('reporter - local options', (t) => {
           log(options, tags, message) {
             t.deepEqual(options, {
               filter: [],
+              throttle: false,
+              throttleBasedOnTags: false,
               exclude: [],
               test: false,
               log: 'info'
