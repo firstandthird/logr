@@ -14,13 +14,14 @@ const defaults = {
   reporterDefaults: {
     filter: [],
     exclude: []
-  }
+  },
+  rateLimit: {}
 };
 
 class Logger {
   constructor(options) {
     this.config = aug('defaults', defaults, options);
-
+    this.rateLimits = {};
     //override filter with env vars
     if (process.env.LOGR_FILTER) {
       this.config.filter = process.env.LOGR_FILTER.split(',');
@@ -174,6 +175,15 @@ class Logger {
     });
   }
 
+  getMatchingRateDirective(tags) {
+    for (let i = 0; i < this.config.rateLimit.length; i++) {
+      const rateItem = this.config.rateLimit[i];
+      if (intersection(rateItem.tags, tags).length === rateItem.tags.length) {
+        return rateItem;
+      }
+    }
+  }
+
   reporterLog(reporterName, tags, message) {
     const reporterObj = this.reporters[reporterName];
     const options = reporterObj.options;
@@ -189,6 +199,19 @@ class Logger {
     //if there are excludes and they match, stop here
     if (options.exclude.length !== 0 && intersection(options.exclude, tags).length > 0) {
       return;
+    }
+
+    // check if it matches any rate-limit directives:
+    const rateDirective = this.getMatchingRateDirective(tags);
+    if (rateDirective) {
+      const tagKey = tags.join('');
+      const curTime = new Date().getTime();
+      if (this.rateLimits[tagKey]) {
+        if (curTime - this.rateLimits[tagKey] < rateDirective.rate) {
+          return;
+        }
+      }
+      this.rateLimits[tagKey] = curTime;
     }
     //pass in the options, tag and message to reporter
     const out = reporterObj.reporter.log(reporterObj.options, tags, message);

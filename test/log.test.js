@@ -120,3 +120,32 @@ test('log - default tags', (t) => {
   });
   logr.log(['debug'], '1');
 });
+
+test('log - rate limit by tags', (t) => {
+  let invocationCount = 0;
+  const logr = new Logr({
+    rateLimit: [
+      { tags: ['tag1', 'tag2'], rate: 1000 }
+    ],
+    reporters: {
+      test(options, tags, message) {
+        invocationCount++;
+      }
+    }
+  });
+  logr.log(['s1', 'tag1', 'tag2'], 'test');
+  logr.log(['s2', 'tag1', 'tag2'], 'test');
+  logr.log(['s2', 'tag1'], 'test');
+  setTimeout(() => {
+    logr.log(['s1', 'tag1', 'tag2'], 'test');
+    logr.log(['s2', 'tag1', 'tag2'], 'test');
+    logr.log(['s2', 'tag1'], 'test');
+    setTimeout(() => {
+      logr.log(['s1', 'tag1', 'tag2'], 'test');
+      logr.log(['s2', 'tag1', 'tag2'], 'test');
+      logr.log(['s2', 'tag1'], 'test');
+      t.equal(invocationCount, 7);
+      t.end();
+    }, 1000);
+  }, 500);
+});
