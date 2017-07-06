@@ -179,7 +179,7 @@ class Logger {
   reporterLog(reporterName, tags, message, additionalOptions) {
     const reporterObj = this.reporters[reporterName];
     if (additionalOptions && additionalOptions[reporterName]) {
-      Object.assign(reporterObj.options, additionalOptions[reporterName]);
+      aug(reporterObj.options, additionalOptions[reporterName]);
     }
     const options = reporterObj.options;
 
