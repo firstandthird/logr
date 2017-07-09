@@ -149,7 +149,7 @@ class Logger {
     this.reporters[key] = reporterObj;
   }
 
-  log(tags, message) {
+  log(tags, message, options) {
     //tags are optional
     if (arguments.length === 1) {
       message = tags;
@@ -172,12 +172,15 @@ class Logger {
     }
     Object.keys(this.reporters).forEach((name) => {
       const messageClone = (typeof message === 'object') ? aug({}, message) : message;
-      this.reporterLog(name, tags.slice(0), messageClone);
+      this.reporterLog(name, tags.slice(0), messageClone, options);
     });
   }
 
-  reporterLog(reporterName, tags, message) {
+  reporterLog(reporterName, tags, message, additionalOptions) {
     const reporterObj = this.reporters[reporterName];
+    if (additionalOptions && additionalOptions[reporterName]) {
+      aug(reporterObj.options, additionalOptions[reporterName]);
+    }
     const options = reporterObj.options;
 
     //reporters can be disabled on the option level

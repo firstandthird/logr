@@ -106,6 +106,37 @@ test('reporter - local options', (t) => {
   logr.log(['debug'], '1');
 });
 
+
+test('reporter - local options', (t) => {
+  const logr = new Logr({
+    reporters: {
+      test: {
+        options: {
+          test: false,
+          log: 'info'
+        },
+        reporter: {
+          defaults: {
+            test: true
+          },
+          log(options, tags, message) {
+            t.deepEqual(options, {
+              filter: [],
+              throttle: false,
+              throttleBasedOnTags: false,
+              exclude: [],
+              test: false,
+              log: 'test info'
+            });
+            t.end();
+          }
+        }
+      }
+    }
+  });
+  logr.log(['debug'], '1', { test: { log: 'test info' } });
+});
+
 test('log - multiple reporters', (t) => {
   let count = 0;
   const logr = new Logr({
