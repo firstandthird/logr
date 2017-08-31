@@ -11,6 +11,7 @@ const defaults = {
   defaultTags: [],
   logger: null,
   reporters: null,
+  addErrorTagToErrors: true,
   reporterDefaults: {
     filter: [],
     throttle: false,
@@ -163,7 +164,7 @@ class Logger {
         stack: message.stack
       };
       //auto add error tag if its an error
-      if (tags.indexOf('error') < 0 && (!options.clientErrorsToWarnings)) {
+      if (tags.indexOf('error') < 0 && (options.addErrorTagToErrors)) {
         tags.push('error');
       }
     }
