@@ -163,7 +163,7 @@ class Logger {
         stack: message.stack
       };
       //auto add error tag if its an error
-      if (tags.indexOf('error') < 0) {
+      if (tags.indexOf('error') < 0 && (!options.clientErrorsToWarnings)) {
         tags.push('error');
       }
     }
