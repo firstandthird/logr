@@ -22,6 +22,7 @@ const defaults = {
 class Logger {
   constructor(options) {
     this.config = aug('defaults', defaults, options);
+    this.rateLimits = {};
     //override filter with env vars
     if (process.env.LOGR_FILTER) {
       this.config.filter = process.env.LOGR_FILTER.split(',');
@@ -51,11 +52,6 @@ class Logger {
     }
     this.reporters = {};
     this.setupReporters();
-    // initialize rate-limiting statements:
-    this.rateLimits = {};
-    Object.keys(this.reporters).forEach((reporterName) => {
-      this.rateLimits[reporterName] = {};
-    });
   }
 
   setupReporters() {
@@ -151,6 +147,8 @@ class Logger {
     reporterObj.options.exclude = reporterObj.options.exclude.concat(this.config.exclude);
 
     this.reporters[key] = reporterObj;
+    // init rate-limiting for this reporter:
+    this.rateLimits[key] = {};
   }
 
   log(tags, message, options) {
