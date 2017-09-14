@@ -121,11 +121,19 @@ test('log - default tags', (t) => {
   logr.log(['debug'], '1');
 });
 
-test('log - rate limit all calls to log', (t) => {
+test('log - rate limit all calls to log for each individual reporter', (t) => {
   let invocationCount = 0;
   const logr = new Logr({
     reporters: {
       test: {
+        reporter: (options, tags, message) => {
+          invocationCount++;
+        },
+        options: {
+          throttle: 1000
+        }
+      },
+      test2: {
         reporter: (options, tags, message) => {
           invocationCount++;
         },
@@ -146,7 +154,7 @@ test('log - rate limit all calls to log', (t) => {
       logr.log(['s1', 'tag1', 'tag2'], 'test');
       logr.log(['s2', 'tag1', 'tag2'], 'test');
       logr.log(['s2', 'tag1'], 'test');
-      t.equal(invocationCount, 2);
+      t.equal(invocationCount, 4);
       t.end();
     }, 1000);
   }, 500);
