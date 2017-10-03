@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "aug": "1.0.2",
-    "lodash.intersection": "4.4.0"
+    "lodash.intersection": "4.4.0",
+    "serialize-error": "^2.1.0"
   },
   "devDependencies": {
     "eslint": "3.16.1",
