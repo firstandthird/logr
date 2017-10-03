@@ -2,7 +2,7 @@
 
 const aug = require('aug');
 const intersection = require('lodash.intersection');
-
+const serialize = require('serialize-error');
 const defaults = {
   filter: [],
   unhandledRejection: false,
@@ -160,10 +160,7 @@ class Logger {
 
     //if message is an error, turn it into a pretty object because Errors aren't json.stringifiable
     if (message instanceof Error) {
-      message = {
-        message: message.message,
-        stack: message.stack
-      };
+      message = serialize(message);
       //auto add error tag if its an error
       if (!options) {
         options = {};
