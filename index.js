@@ -21,7 +21,7 @@ const defaults = {
 
 class Logger {
   constructor(options) {
-    this.config = aug('defaults', defaults, options);
+    this.config = aug(defaults, options);
     this.rateLimits = {};
     //override filter with env vars
     if (process.env.LOGR_FILTER) {
@@ -135,7 +135,6 @@ class Logger {
 
     //merge logr reporter defaults, defaults defined by reporter and options passed in
     reporterObj.options = aug(
-      {},
       this.config.reporterDefaults,
       reporterObj.reporter.defaults || {},
       reporterObj.options || {}
@@ -176,7 +175,7 @@ class Logger {
       tags = this.config.defaultTags.concat(tags);
     }
     Object.keys(this.reporters).forEach((name) => {
-      const messageClone = (typeof message === 'object') ? aug({}, message) : message;
+      const messageClone = (typeof message === 'object') ? aug(message) : message;
       this.reporterLog(name, tags.slice(0), messageClone, options);
     });
   }
@@ -184,7 +183,7 @@ class Logger {
   reporterLog(reporterName, tags, message, additionalOptions) {
     const reporterObj = this.reporters[reporterName];
     if (additionalOptions && additionalOptions[reporterName]) {
-      aug(reporterObj.options, additionalOptions[reporterName]);
+      reporterObj.options = aug(reporterObj.options, additionalOptions[reporterName]);
     }
     const options = reporterObj.options;
 
