@@ -1,6 +1,9 @@
 'use strict';
-const test = require('tap').test;
+const tap = require('tap');
+const test = tap.test;
 const Logr = require('../');
+
+//tap.runOnly = true;
 
 test('reporter - allow strings to load reporters', (t) => {
   const logr = new Logr({
@@ -69,6 +72,33 @@ test('reporter - default options', (t) => {
             });
             t.end();
           }
+        }
+      }
+    }
+  });
+  logr.log(['debug'], '1');
+});
+
+test('reporter - init', (t) => {
+  const logr = new Logr({
+    reporters: {
+      test: {
+        reporter: {
+          init(options) {
+            t.deepEqual(options, {
+              filter: [],
+              exclude: [],
+              heyooo: '123',
+              throttle: false,
+              throttleBasedOnTags: false
+            });
+            t.end();
+          },
+          log(options, tags, message) {
+          }
+        },
+        options: {
+          heyooo: '123'
         }
       }
     }

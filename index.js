@@ -148,6 +148,9 @@ class Logger {
     this.reporters[key] = reporterObj;
     // init rate-limiting for this reporter:
     this.rateLimits[key] = {};
+    if (typeof reporterObj.reporter.init === 'function') {
+      reporterObj.reporter.init(reporterObj.options);
+    }
   }
 
   log(tags, message, options) {
