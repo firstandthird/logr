@@ -106,6 +106,28 @@ test('reporter - init', (t) => {
   logr.log(['debug'], '1');
 });
 
+test('reporter - init only if enabled', (t) => {
+  const logr = new Logr({
+    reporters: {
+      test: {
+        reporter: {
+          init(options) {
+            t.ok(false);
+          },
+          log(options, tags, message) {
+          }
+        },
+        options: {
+          enabled: false,
+          heyooo: '123'
+        }
+      }
+    }
+  });
+  logr.log(['debug'], '1');
+  t.end();
+});
+
 test('reporter - local options', (t) => {
   const logr = new Logr({
     reporters: {
