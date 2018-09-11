@@ -61,7 +61,7 @@ class Logger {
       Object.keys(this.reporters).forEach(r => {
         report[`${r}Filter`] = this.reporters[r].options.filter;
       });
-      this.logger(`['logr', 'init'], ${JSON.stringify(report)}`);
+      this.log(['logr', 'init'], report);
     }
   }
 

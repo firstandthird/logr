@@ -266,13 +266,21 @@ test('log - initLog', (t) => {
   new Logr({
     initLog: true,
     reporters: {
-      test(options, tags, message) {
+      test: {
+        reporter: './lib/console',
+        options: {
+          timestamp: false
+        }
       },
-      test2(options, tags, message) {
+      test2: {
+        reporter: () => {},
+        options: {
+          filter: ['hapi']
+        }
       }
     }
   });
   console.log = oldLog;
-  t.equal(vals[0], '[\'logr\', \'init\'], {"message":"Logr initialized","enabledReporters":"test,test2","testFilter":[],"test2Filter":[]}');
+  t.equal(vals[0], '[logr,init] {"message":"Logr initialized","enabledReporters":"test,test2","testFilter":[],"test2Filter":["hapi"]}');
   t.end();
 });
