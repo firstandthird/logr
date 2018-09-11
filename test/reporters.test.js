@@ -158,7 +158,6 @@ test('reporter - local options', (t) => {
   logr.log(['debug'], '1');
 });
 
-
 test('reporter - local options', (t) => {
   const logr = new Logr({
     reporters: {
@@ -255,5 +254,25 @@ test('log - disable reporter', (t) => {
   });
   logr.log(['debug'], '1');
   t.equal(count, 1);
+  t.end();
+});
+
+test('log - initLog', (t) => {
+  const oldLog = console.log;
+  const vals = [];
+  console.log = (val) => {
+    vals.push(val);
+  };
+  new Logr({
+    initLog: true,
+    reporters: {
+      test(options, tags, message) {
+      },
+      test2(options, tags, message) {
+      }
+    }
+  });
+  console.log = oldLog;
+  t.equal(vals[0], '[\'logr\', \'init\'], {"message":"Logr initialized","enabledReporters":"test,test2","testFilter":[],"test2Filter":[]}');
   t.end();
 });

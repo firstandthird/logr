@@ -4,6 +4,7 @@ const aug = require('aug');
 const intersection = require('lodash.intersection');
 const serialize = require('serialize-error');
 const defaults = {
+  initLog: false,
   filter: [],
   unhandledRejection: false,
   uncaughtException: false,
@@ -52,6 +53,16 @@ class Logger {
     }
     this.reporters = {};
     this.setupReporters();
+    if (this.config.initLog && this.reporters) {
+      const report = {
+        message: 'Logr initialized',
+        enabledReporters: Object.keys(this.reporters).join(',')
+      };
+      Object.keys(this.reporters).forEach(r => {
+        report[`${r}Filter`] = this.reporters[r].options.filter;
+      });
+      this.logger(`['logr', 'init'], ${JSON.stringify(report)}`);
+    }
   }
 
   setupReporters() {
