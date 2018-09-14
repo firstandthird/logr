@@ -192,3 +192,26 @@ test('log - rate limit by tag signature', (t) => {
     }, 1000);
   }, 500);
 });
+
+test('log - handle reporter errors', (t) => {
+  const oldLog = console.log;
+  const logs = [];
+  console.log = (data) => {
+    logs.push(data);
+  };
+  const logr = new Logr({
+    reporters: {
+      test(options, tags, message) {
+        throw new Error('an error');
+      }
+    }
+  });
+  logr.log(['debug'], {
+    value: 1234
+  });
+  logr.log(['debug'], 'a message');
+  console.log = oldLog;
+  t.match(logs[0], { tags: ['debug'], message: { value: 1234 } });
+  t.match(logs[2], { tags: ['debug'], message: 'a message' });
+  t.end();
+});

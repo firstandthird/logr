@@ -190,7 +190,12 @@ class Logger {
     }
     Object.keys(this.reporters).forEach((name) => {
       const messageClone = (typeof message === 'object') ? aug(message) : message;
-      this.reporterLog(name, tags.slice(0), messageClone, options);
+      try {
+        this.reporterLog(name, tags.slice(0), messageClone, options);
+      } catch (e) {
+        console.log({ tags, message });
+        console.log(e);
+      }
     });
   }
 
