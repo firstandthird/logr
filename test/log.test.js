@@ -211,7 +211,7 @@ test('log - handle reporter errors', (t) => {
   });
   logr.log(['debug'], 'a message');
   console.log = oldLog;
-  t.match(logs[0], 'Reporter "test" threw an error while logging | Tags: debug | Message: {"value":1234}');
-  t.match(logs[2], 'Reporter "test" threw an error while logging | Tags: debug | Message: a message');
+  t.match(logs[0], { tags: ['debug'], message: { value: 1234 } });
+  t.match(logs[2], { tags: ['debug'], message: 'a message' });
   t.end();
 });

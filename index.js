@@ -193,7 +193,7 @@ class Logger {
       try {
         this.reporterLog(name, tags.slice(0), messageClone, options);
       } catch (e) {
-        console.log(`Reporter "${name}" threw an error while logging | Tags: ${tags.join(',')} | Message: ${typeof messageClone === 'object' ? JSON.stringify(messageClone) : messageClone}`);
+        console.log({ tags, message });
         console.log(e);
       }
     });
