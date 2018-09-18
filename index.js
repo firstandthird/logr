@@ -170,20 +170,28 @@ class Logger {
       message = tags;
       tags = [];
     }
-
+    if (!options) {
+      options = {};
+    }
+    //auto add error tag if its an error
+    if (options.addErrorTagToErrors === undefined) {
+      options.addErrorTagToErrors = true;
+    }
     //if message is an error, turn it into a pretty object because Errors aren't json.stringifiable
     if (message instanceof Error) {
       message = serialize(message);
-      //auto add error tag if its an error
-      if (!options) {
-        options = {};
-      }
-      if (options.addErrorTagToErrors === undefined) {
-        options.addErrorTagToErrors = true;
-      }
       if (tags.indexOf('error') < 0 && options.addErrorTagToErrors) {
         tags.push('error');
       }
+    } else if (typeof message === 'object') {
+      Object.keys(message).forEach(key => {
+        if (message[key] instanceof Error) {
+          if (tags.indexOf('error') < 0 && options.addErrorTagToErrors) {
+            tags.push('error');
+          }
+          message[key] = serialize(message[key]);
+        }
+      });
     }
     if (this.config.defaultTags.length !== 0) {
       tags = this.config.defaultTags.concat(tags);
