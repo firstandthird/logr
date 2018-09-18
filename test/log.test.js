@@ -28,6 +28,22 @@ test('log - tags', (t) => {
   logr.log(['debug'], 'test');
 });
 
+test('log - error as object key', (t) => {
+  const logr = new Logr({
+    reporters: {
+      test(options, tags, message) {
+        t.deepEqual(tags, ['debug', 'error']);
+        t.equal(typeof message, 'object');
+        t.equal(message.anError.message, 'hi there');
+        t.equal(typeof message.anError.stack, 'string');
+        t.equal(message.anError.name, 'Error');
+        t.end();
+      }
+    }
+  });
+  logr.log(['debug'], { anError: new Error('hi there') });
+});
+
 test('log - error', (t) => {
   const logr = new Logr({
     reporters: {
