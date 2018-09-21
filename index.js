@@ -54,11 +54,12 @@ class Logger {
     this.reporters = {};
     this.setupReporters();
     if (this.config.initLog && this.reporters) {
+      const enabledReporters = Object.keys(this.reporters).filter(name => this.reporters[name].options.enabled !== false);
       const report = {
         message: 'Logr initialized',
-        enabledReporters: Object.keys(this.reporters).join(',')
+        enabledReporters: enabledReporters.join(',')
       };
-      Object.keys(this.reporters).forEach(r => {
+      enabledReporters.forEach(r => {
         report[`${r}Filter`] = this.reporters[r].options.filter;
       });
       this.log(['logr', 'init'], report);

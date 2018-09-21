@@ -277,6 +277,12 @@ test('log - initLog', (t) => {
         options: {
           filter: ['hapi']
         }
+      },
+      test3: {
+        reporter: './lib/console',
+        options: {
+          enabled: false
+        }
       }
     }
   });
