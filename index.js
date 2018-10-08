@@ -166,19 +166,32 @@ class Logger {
   }
 
   serialize(tags, message, options) {
-    if (tags.indexOf('error') < 0 && options.addErrorTagToErrors) {
-      tags.push('error');
+    //if message is an error, turn it into a pretty object because Errors aren't json.stringifiable
+    if (message instanceof Error) {
+      if (tags.indexOf('error') < 0 && options.addErrorTagToErrors) {
+        tags.push('error');
+      }
+      // prettyify wreck response errors here:
+      if (message.data && message.data.isResponseError) {
+        const res = message.data.res;
+        message = {
+          message: `Response Error: ${res.statusCode}  ${res.statusMessage}`,
+          statusCode: res.statusCode,
+          payload: res.payload
+        };
+        return message;
+      }
+      // otherwise it's a normal error:
+      return serializeInner(message);
     }
-    if (message.data && message.data.isResponseError) {
-      const res = message.data.res;
-      message = {
-        message: `Response Error: ${res.statusCode}  ${res.statusMessage}`,
-        statusCode: res.statusCode,
-        payload: res.payload
-      };
-      return message;
+    if (typeof message === 'object') {
+      Object.keys(message).forEach(key => {
+        if (message[key] instanceof Error) {
+          message[key] = this.serialize(tags, message[key], options);
+        }
+      });
     }
-    return serializeInner(message);
+    return message;
   }
 
   log(tags, message, options) {
@@ -194,16 +207,7 @@ class Logger {
     if (options.addErrorTagToErrors === undefined) {
       options.addErrorTagToErrors = true;
     }
-    //if message is an error, turn it into a pretty object because Errors aren't json.stringifiable
-    if (message instanceof Error) {
-      message = this.serialize(tags, message, options);
-    } else if (typeof message === 'object') {
-      Object.keys(message).forEach(key => {
-        if (message[key] instanceof Error) {
-          message[key] = this.serialize(tags, message[key], options);
-        }
-      });
-    }
+    message = this.serialize(tags, message, options);
     if (this.config.defaultTags.length !== 0) {
       tags = this.config.defaultTags.concat(tags);
     }
