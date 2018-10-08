@@ -21,7 +21,9 @@
     "eslint": "3.16.1",
     "eslint-config-firstandthird": "3.3.0",
     "eslint-plugin-import": "2.2.0",
-    "tap": "^10.2.0"
+    "hapi": "^17.6.0",
+    "tap": "^10.2.0",
+    "wreck": "^14.1.0"
   },
   "keywords": [
     "log",

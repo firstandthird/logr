@@ -180,6 +180,14 @@ class Logger {
     }
     //if message is an error, turn it into a pretty object because Errors aren't json.stringifiable
     if (message instanceof Error) {
+      if (message.data && message.data.isResponseError) {
+        const res = message.data.res;
+        message = {
+          message: `Response Error: ${res.statusCode}  ${res.statusMessage}`,
+          statusCode: res.statusCode,
+          payload: res.payload
+        };
+      }
       message = serialize(message);
       if (tags.indexOf('error') < 0 && options.addErrorTagToErrors) {
         tags.push('error');
