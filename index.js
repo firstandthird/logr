@@ -2,7 +2,7 @@
 
 const aug = require('aug');
 const intersection = require('lodash.intersection');
-const serialize = require('serialize-error');
+const serializeInner = require('serialize-error');
 const defaults = {
   initLog: false,
   filter: [],
@@ -165,6 +165,22 @@ class Logger {
     }
   }
 
+  serialize(tags, message, options) {
+    if (tags.indexOf('error') < 0 && options.addErrorTagToErrors) {
+      tags.push('error');
+    }
+    if (message.data && message.data.isResponseError) {
+      const res = message.data.res;
+      message = {
+        message: `Response Error: ${res.statusCode}  ${res.statusMessage}`,
+        statusCode: res.statusCode,
+        payload: res.payload
+      };
+      return message;
+    }
+    return serializeInner(message);
+  }
+
   log(tags, message, options) {
     //tags are optional
     if (arguments.length === 1) {
@@ -180,25 +196,11 @@ class Logger {
     }
     //if message is an error, turn it into a pretty object because Errors aren't json.stringifiable
     if (message instanceof Error) {
-      if (message.data && message.data.isResponseError) {
-        const res = message.data.res;
-        message = {
-          message: `Response Error: ${res.statusCode}  ${res.statusMessage}`,
-          statusCode: res.statusCode,
-          payload: res.payload
-        };
-      }
-      message = serialize(message);
-      if (tags.indexOf('error') < 0 && options.addErrorTagToErrors) {
-        tags.push('error');
-      }
+      message = this.serialize(tags, message, options);
     } else if (typeof message === 'object') {
       Object.keys(message).forEach(key => {
         if (message[key] instanceof Error) {
-          if (tags.indexOf('error') < 0 && options.addErrorTagToErrors) {
-            tags.push('error');
-          }
-          message[key] = serialize(message[key]);
+          message[key] = this.serialize(tags, message[key], options);
         }
       });
     }
