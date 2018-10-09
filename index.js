@@ -11,6 +11,7 @@ const defaults = {
   exclude: [],
   defaultTags: [],
   logger: null,
+  blacklist: 'password|token',
   reporters: null,
   reporterDefaults: {
     filter: [],
@@ -166,6 +167,7 @@ class Logger {
   }
 
   serialize(tags, message, options) {
+    options = aug(this.config, options);
     //if message is an error, turn it into a pretty object because Errors aren't json.stringifiable
     if (message instanceof Error) {
       if (tags.indexOf('error') < 0 && options.addErrorTagToErrors) {
@@ -185,7 +187,12 @@ class Logger {
       return serializeInner(message);
     }
     if (typeof message === 'object') {
+      // blacklist any blacklisted tags:
+      const blacklistRegEx = new RegExp(options.blacklist, 'i'); // blacklist is case insensitive
       Object.keys(message).forEach(key => {
+        if (key.match && key.match(blacklistRegEx) !== null) {
+          message[key] = 'xxxxxx';
+        }
         if (message[key] instanceof Error) {
           message[key] = this.serialize(tags, message[key], options);
         }

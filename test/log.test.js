@@ -231,3 +231,20 @@ test('log - handle reporter errors', (t) => {
   t.match(logs[2], { tags: ['debug'], message: 'a message' });
   t.end();
 });
+
+test('can use the blacklist regex to filter out sensitive info', t => {
+  const logr = new Logr({
+    blacklist: 'spader',
+    reporters: {
+      test(options, tags, message) {
+        t.match(message.james, '1');
+        t.match(message.spader, 'xxxxxx');
+      }
+    }
+  });
+  logr.log(['debug'], {
+    james: '1',
+    spader: '2'
+  });
+  t.end();
+});
