@@ -1,42 +1,44 @@
-'use strict';
-/*
 const test = require('tap').test;
 const Logr = require('../');
+const wreck = require('wreck');
+const Hapi = require('hapi');
 
-test('error - uncaught promise', (t) => {
-  new Logr({
+test('handle wreck errors', async t => {
+  const server = new Hapi.Server({ port: 8080 });
+  await server.start();
+  let first = true;
+  const logr = new Logr({
     unhandledRejection: true,
     reporters: {
       test(options, tags, message) {
-        t.deepEqual(tags, ['promise', 'error']);
-        t.equal(typeof message, 'object');
-        t.equal(message.message, 'this is an error');
-        t.equal(typeof message.stack, 'string');
-        t.end();
+        t.equal(tags[0], 'error');
+        if (first) {
+          first = false;
+          t.match(message, {
+            message: 'Response Error: 404  Not Found',
+            statusCode: 404,
+            payload: undefined
+          });
+        } else {
+          t.match(message, {
+            error: {
+              message: 'Response Error: 404  Not Found',
+              statusCode: 404,
+              payload: undefined
+            }
+          });
+        }
       }
     }
   });
-  function foo() {
-    Promise.reject(new Error('this is an error'));
+  try {
+    await wreck.get('http://localhost:8080/', {});
+  } catch (e) {
+    logr.log(e);
+    logr.log({ error: e });
   }
-  foo();
+  setTimeout(async () => {
+    await server.stop();
+    t.end();
+  }, 2000);
 });
-
-test('error - uncaught exception', (t) => {
-  new Logr({
-    uncaughtException: true,
-    reporters: {
-      test(options, tags, message) {
-        t.deepEqual(tags, ['promise', 'error']);
-        t.equal(typeof message, 'object');
-        t.equal(message.message, 'this is an error');
-        t.equal(typeof message.stack, 'string');
-        t.end();
-      }
-    }
-  });
-  t.throws(() => {
-    nonexustingfun(); //eslint-disable-line
-  });
-});
-*/
