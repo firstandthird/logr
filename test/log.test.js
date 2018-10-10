@@ -234,11 +234,15 @@ test('log - handle reporter errors', (t) => {
 
 test('can use the blacklist regex to filter out sensitive info', t => {
   const logr = new Logr({
-    blacklist: 'spader',
     reporters: {
-      test(options, tags, message) {
-        t.match(message.james, '1');
-        t.match(message.spader, 'xxxxxx');
+      test: {
+        reporter(options, tags, message) {
+          t.match(message.james, '1');
+          t.match(message.spader, 'xxxxxx');
+        },
+        options: {
+          blacklist: 'spader'
+        }
       }
     }
   });

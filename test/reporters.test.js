@@ -64,6 +64,7 @@ test('reporter - default options', (t) => {
           },
           log(options, tags, message) {
             t.deepEqual(options, {
+              blacklist: 'password|token',
               filter: [],
               exclude: [],
               test: true,
@@ -86,6 +87,7 @@ test('reporter - init', (t) => {
         reporter: {
           init(options) {
             t.deepEqual(options, {
+              blacklist: 'password|token',
               filter: [],
               exclude: [],
               heyooo: '123',
@@ -142,6 +144,7 @@ test('reporter - local options', (t) => {
           },
           log(options, tags, message) {
             t.deepEqual(options, {
+              blacklist: 'password|token',
               filter: [],
               throttle: false,
               throttleBasedOnTags: false,
@@ -172,6 +175,7 @@ test('reporter - local options', (t) => {
           },
           log(options, tags, message) {
             t.deepEqual(options, {
+              blacklist: 'password|token',
               filter: [],
               throttle: false,
               throttleBasedOnTags: false,
