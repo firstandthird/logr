@@ -242,8 +242,8 @@ class Logger {
     if (options.exclude.length !== 0 && intersection(options.exclude, tags).length > 0) {
       return;
     }
+    // blacklist any blacklisted tags:
     Object.keys(message).forEach(key => {
-      // blacklist any blacklisted tags:
       const blacklistRegEx = new RegExp(options.blacklist, 'i'); // blacklist is case insensitive
       if (key.match && key.match(blacklistRegEx) !== null) {
         message[key] = 'xxxxxx';
