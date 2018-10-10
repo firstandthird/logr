@@ -8,12 +8,12 @@ const defaults = {
   filter: [],
   unhandledRejection: false,
   uncaughtException: false,
+  blacklist: 'password|token',
   exclude: [],
   defaultTags: [],
   logger: null,
   reporters: null,
   reporterDefaults: {
-    blacklist: 'password|token',
     filter: [],
     throttle: false,
     throttleBasedOnTags: false,
@@ -186,7 +186,12 @@ class Logger {
       return serializeInner(message);
     }
     if (typeof message === 'object') {
+      // obscure any blacklisted tags:
+      const blacklistRegEx = new RegExp(options.blacklist, 'i'); // blacklist is case insensitive
       Object.keys(message).forEach(key => {
+        if (key.match && key.match(blacklistRegEx) !== null) {
+          message[key] = 'xxxxxx';
+        }
         if (message[key] instanceof Error) {
           message[key] = this.serialize(tags, message[key], options);
         }
@@ -204,6 +209,8 @@ class Logger {
     if (!options) {
       options = {};
     }
+    // merge passed options with the configured options, needed to serialize:
+    options = aug(options, this.config);
     //auto add error tag if its an error
     if (options.addErrorTagToErrors === undefined) {
       options.addErrorTagToErrors = true;
@@ -242,14 +249,6 @@ class Logger {
     if (options.exclude.length !== 0 && intersection(options.exclude, tags).length > 0) {
       return;
     }
-    // blacklist any blacklisted tags:
-    Object.keys(message).forEach(key => {
-      const blacklistRegEx = new RegExp(options.blacklist, 'i'); // blacklist is case insensitive
-      if (key.match && key.match(blacklistRegEx) !== null) {
-        message[key] = 'xxxxxx';
-      }
-    });
-
     // if throttling was specified then throttle log rate:
     if (options.throttle) {
       const tagKey = options.throttleBasedOnTags ? tags.join('') : 'all';
