@@ -197,6 +197,8 @@ class Logger {
           message[key] = 'xxxxxx';
         }
         if (message[key] instanceof Error) {
+          // nested errors never add an error tag:
+          options.addErrorTagToErrors = false;
           message[key] = this.serialize(tags, message[key], options);
         }
       });

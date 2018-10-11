@@ -32,7 +32,7 @@ test('log - error as object key', (t) => {
   const logr = new Logr({
     reporters: {
       test(options, tags, message) {
-        t.deepEqual(tags, ['debug', 'error']);
+        t.deepEqual(tags, ['debug']);
         t.equal(typeof message, 'object');
         t.equal(message.anError.message, 'hi there');
         t.equal(typeof message.anError.stack, 'string');
