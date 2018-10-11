@@ -210,9 +210,6 @@ class Logger {
       message = tags;
       tags = [];
     }
-    if (!options) {
-      options = {};
-    }
     message = this.serialize(tags, message, this.config);
     if (this.config.defaultTags.length !== 0) {
       tags = this.config.defaultTags.concat(tags);
@@ -220,7 +217,7 @@ class Logger {
     Object.keys(this.reporters).forEach((name) => {
       const messageClone = (typeof message === 'object') ? aug(message) : message;
       try {
-        this.reporterLog(name, tags.slice(0), messageClone, options);
+        this.reporterLog(name, tags.slice(0), messageClone, options || {});
       } catch (e) {
         console.log({ tags, message });
         console.log(e);
