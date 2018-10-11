@@ -32,7 +32,7 @@ test('log - error as object key', (t) => {
   const logr = new Logr({
     reporters: {
       test(options, tags, message) {
-        t.deepEqual(tags, ['debug', 'error']);
+        t.deepEqual(tags, ['debug']);
         t.equal(typeof message, 'object');
         t.equal(message.anError.message, 'hi there');
         t.equal(typeof message.anError.stack, 'string');
@@ -229,5 +229,24 @@ test('log - handle reporter errors', (t) => {
   console.log = oldLog;
   t.match(logs[0], { tags: ['debug'], message: { value: 1234 } });
   t.match(logs[2], { tags: ['debug'], message: 'a message' });
+  t.end();
+});
+
+test('can use the blacklist regex to filter out sensitive info', t => {
+  const logr = new Logr({
+    blacklist: 'spader',
+    reporters: {
+      test: {
+        reporter(options, tags, message) {
+          t.match(message.james, '1');
+          t.match(message.spader, 'xxxxxx');
+        },
+      }
+    }
+  });
+  logr.log(['debug'], {
+    james: '1',
+    spader: '2'
+  });
   t.end();
 });

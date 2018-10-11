@@ -11,15 +11,16 @@ test('handle wreck errors', async t => {
     unhandledRejection: true,
     reporters: {
       test(options, tags, message) {
-        t.equal(tags[0], 'error');
         if (first) {
           first = false;
+          t.equal(tags[0], 'error');
           t.match(message, {
             message: 'Response Error: 404  Not Found',
             statusCode: 404,
             payload: undefined
           });
         } else {
+          t.notEqual(tags[0], 'error');
           t.match(message, {
             error: {
               message: 'Response Error: 404  Not Found',

@@ -8,6 +8,7 @@ const defaults = {
   filter: [],
   unhandledRejection: false,
   uncaughtException: false,
+  blacklist: 'password|token',
   exclude: [],
   defaultTags: [],
   logger: null,
@@ -166,6 +167,10 @@ class Logger {
   }
 
   serialize(tags, message, options) {
+    //auto add error tag if its an error
+    if (options.addErrorTagToErrors === undefined) {
+      options.addErrorTagToErrors = true;
+    }
     //if message is an error, turn it into a pretty object because Errors aren't json.stringifiable
     if (message instanceof Error) {
       if (tags.indexOf('error') < 0 && options.addErrorTagToErrors) {
@@ -185,9 +190,15 @@ class Logger {
       return serializeInner(message);
     }
     if (typeof message === 'object') {
+      // obscure any blacklisted tags:
+      const blacklistRegEx = new RegExp(options.blacklist, 'i'); // blacklist is case insensitive
       Object.keys(message).forEach(key => {
+        if (key.match && key.match(blacklistRegEx) !== null) {
+          message[key] = 'xxxxxx';
+        }
         if (message[key] instanceof Error) {
-          message[key] = this.serialize(tags, message[key], options);
+          // nested errors never add an error tag:
+          message[key] = this.serialize(tags, message[key], Object.assign({}, options, { addErrorTagToErrors: false }));
         }
       });
     }
@@ -200,21 +211,14 @@ class Logger {
       message = tags;
       tags = [];
     }
-    if (!options) {
-      options = {};
-    }
-    //auto add error tag if its an error
-    if (options.addErrorTagToErrors === undefined) {
-      options.addErrorTagToErrors = true;
-    }
-    message = this.serialize(tags, message, options);
+    message = this.serialize(tags, message, this.config);
     if (this.config.defaultTags.length !== 0) {
       tags = this.config.defaultTags.concat(tags);
     }
     Object.keys(this.reporters).forEach((name) => {
       const messageClone = (typeof message === 'object') ? aug(message) : message;
       try {
-        this.reporterLog(name, tags.slice(0), messageClone, options);
+        this.reporterLog(name, tags.slice(0), messageClone, options || {});
       } catch (e) {
         console.log({ tags, message });
         console.log(e);
