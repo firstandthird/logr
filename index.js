@@ -167,6 +167,10 @@ class Logger {
   }
 
   serialize(tags, message, options) {
+    //auto add error tag if its an error
+    if (options.addErrorTagToErrors === undefined) {
+      options.addErrorTagToErrors = true;
+    }
     //if message is an error, turn it into a pretty object because Errors aren't json.stringifiable
     if (message instanceof Error) {
       if (tags.indexOf('error') < 0 && options.addErrorTagToErrors) {
@@ -209,13 +213,7 @@ class Logger {
     if (!options) {
       options = {};
     }
-    // merge passed options with the configured options, needed to serialize:
-    options = aug(options, this.config);
-    //auto add error tag if its an error
-    if (options.addErrorTagToErrors === undefined) {
-      options.addErrorTagToErrors = true;
-    }
-    message = this.serialize(tags, message, options);
+    message = this.serialize(tags, message, this.config);
     if (this.config.defaultTags.length !== 0) {
       tags = this.config.defaultTags.concat(tags);
     }
