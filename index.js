@@ -198,8 +198,9 @@ class Logger {
         }
         if (message[key] instanceof Error) {
           // nested errors never add an error tag:
-          options.addErrorTagToErrors = false;
-          message[key] = this.serialize(tags, message[key], options);
+          const newOpts = Object.assign({}, options);
+          newOpts.addErrorTagToErrors = false;
+          message[key] = this.serialize(tags, message[key], newOpts);
         }
       });
     }
