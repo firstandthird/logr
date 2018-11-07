@@ -219,8 +219,8 @@ class Logger {
       try {
         this.reporterLog(name, tags.slice(0), messageClone, options || {});
       } catch (e) {
-        console.log({ tags, message });
-        console.log(e);
+        console.log({ tags, message }); //eslint-disable-line no-console
+        console.log(e); //eslint-disable-line no-console
       }
     });
   }

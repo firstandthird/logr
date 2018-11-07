@@ -1,9 +1,13 @@
-const test = require('tap').test;
+/* eslint-disable no-console */
+const tap = require('tap');
 const Logr = require('../');
 const wreck = require('wreck');
 const Hapi = require('hapi');
+const wait = require('util').promisify(setTimeout);
 
-test('handle wreck errors', async t => {
+tap.runOnly = true;
+
+tap.test('handle wreck errors', async t => {
   const server = new Hapi.Server({ port: 8080 });
   await server.start();
   let first = true;
