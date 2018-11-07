@@ -1,8 +1,10 @@
 'use strict';
-const test = require('tap').test;
+const tap = require('tap');
 const Logr = require('../');
 
-test('log - tags optional', (t) => {
+//tap.runOnly = true;
+
+tap.test('log - tags optional', (t) => {
   const logr = new Logr({
     reporters: {
       test(options, tags, message) {
@@ -15,7 +17,7 @@ test('log - tags optional', (t) => {
   logr.log('test');
 });
 
-test('log - tags', (t) => {
+tap.test('log - tags', (t) => {
   const logr = new Logr({
     reporters: {
       test(options, tags, message) {
@@ -28,15 +30,16 @@ test('log - tags', (t) => {
   logr.log(['debug'], 'test');
 });
 
-test('log - error as object key', (t) => {
+tap.test('log - error as object key', (t) => {
   const logr = new Logr({
     reporters: {
       test(options, tags, message) {
+        const msg = JSON.parse(JSON.stringify(message));
         t.deepEqual(tags, ['debug']);
-        t.equal(typeof message, 'object');
-        t.equal(message.anError.message, 'hi there');
-        t.equal(typeof message.anError.stack, 'string');
-        t.equal(message.anError.name, 'Error');
+        t.equal(typeof msg, 'object');
+        t.equal(msg.anError.message, 'hi there');
+        t.equal(typeof msg.anError.stack, 'string');
+        t.equal(msg.anError.name, 'Error');
         t.end();
       }
     }
@@ -44,7 +47,26 @@ test('log - error as object key', (t) => {
   logr.log(['debug'], { anError: new Error('hi there') });
 });
 
-test('log - error', (t) => {
+tap.test('log - nested error as object key', (t) => {
+  const logr = new Logr({
+    reporters: {
+      test(options, tags, message) {
+        const msg = JSON.parse(JSON.stringify(message));
+        t.deepEqual(tags, ['debug']);
+        t.equal(typeof msg, 'object');
+        t.equal(msg.test.anError.message, 'hi there');
+        t.equal(typeof msg.test.anError.stack, 'string');
+        t.equal(msg.test.anError.name, 'Error');
+        t.equal(msg.test.debug, false);
+        t.equal(msg.test.count, 5);
+        t.end();
+      }
+    }
+  });
+  logr.log(['debug'], { test: { anError: new Error('hi there'), debug: false, count: 5 } });
+});
+
+tap.test('log - error', (t) => {
   const logr = new Logr({
     reporters: {
       test(options, tags, message) {
@@ -59,7 +81,7 @@ test('log - error', (t) => {
   logr.log(['debug'], new Error('hi there'));
 });
 
-test('log - error - dont add dupe', (t) => {
+tap.test('log - error - dont add dupe', (t) => {
   const logr = new Logr({
     reporters: {
       test(options, tags, message) {
@@ -74,7 +96,7 @@ test('log - error - dont add dupe', (t) => {
   logr.log(['debug', 'error'], new Error('hi there'));
 });
 
-test('log - single filter', (t) => {
+tap.test('log - single filter', (t) => {
   let count = 0;
   const logr = new Logr({
     filter: ['debug'],
@@ -90,7 +112,7 @@ test('log - single filter', (t) => {
   t.end();
 });
 
-test('log - multiple filters', (t) => {
+tap.test('log - multiple filters', (t) => {
   let count = 0;
   const logr = new Logr({
     filter: ['debug', 'info'],
@@ -107,7 +129,7 @@ test('log - multiple filters', (t) => {
   t.end();
 });
 
-test('log - exclude', (t) => {
+tap.test('log - exclude', (t) => {
   let count = 0;
   const logr = new Logr({
     exclude: ['debug'],
@@ -124,7 +146,7 @@ test('log - exclude', (t) => {
   t.end();
 });
 
-test('log - default tags', (t) => {
+tap.test('log - default tags', (t) => {
   const logr = new Logr({
     defaultTags: ['default'],
     reporters: {
@@ -137,7 +159,7 @@ test('log - default tags', (t) => {
   logr.log(['debug'], '1');
 });
 
-test('log - rate limit all calls to log for each individual reporter', (t) => {
+tap.test('log - rate limit all calls to log for each individual reporter', (t) => {
   let invocationCount = 0;
   const logr = new Logr({
     reporters: {
@@ -176,7 +198,7 @@ test('log - rate limit all calls to log for each individual reporter', (t) => {
   }, 500);
 });
 
-test('log - rate limit by tag signature', (t) => {
+tap.test('log - rate limit by tag signature', (t) => {
   let invocationCount = 0;
   const logr = new Logr({
     throttle: { throttleBasedOnTags: true, rate: 1000 },
@@ -209,7 +231,7 @@ test('log - rate limit by tag signature', (t) => {
   }, 500);
 });
 
-test('log - handle reporter errors', (t) => {
+tap.test('log - handle reporter errors', (t) => {
   const oldLog = console.log;
   const logs = [];
   console.log = (data) => {
@@ -232,7 +254,7 @@ test('log - handle reporter errors', (t) => {
   t.end();
 });
 
-test('can use the blacklist regex to filter out sensitive info', t => {
+tap.test('can use the blacklist regex to filter out sensitive info', t => {
   const logr = new Logr({
     blacklist: 'spader',
     reporters: {

@@ -196,8 +196,7 @@ class Logger {
         if (key.match && key.match(blacklistRegEx) !== null) {
           message[key] = 'xxxxxx';
         }
-        if (message[key] instanceof Error) {
-          // nested errors never add an error tag:
+        if (typeof message[key] === 'object') {
           message[key] = this.serialize(tags, message[key], Object.assign({}, options, { addErrorTagToErrors: false }));
         }
       });
