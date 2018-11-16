@@ -3,7 +3,6 @@ const tap = require('tap');
 const Logr = require('../');
 const wreck = require('wreck');
 const Hapi = require('hapi');
-const wait = require('util').promisify(setTimeout);
 
 tap.runOnly = true;
 
