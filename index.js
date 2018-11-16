@@ -189,7 +189,8 @@ class Logger {
       // otherwise it's a normal error:
       return serializeInner(message);
     }
-    if (typeof message === 'object') {
+    if (typeof message === 'object' && !Array.isArray(message)) {
+      message = Object.assign({}, message);
       // obscure any blacklisted tags:
       const blacklistRegEx = new RegExp(options.blacklist, 'i'); // blacklist is case insensitive
       Object.keys(message).forEach(key => {

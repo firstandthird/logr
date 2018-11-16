@@ -273,3 +273,28 @@ tap.test('can use the blacklist regex to filter out sensitive info', t => {
   });
   t.end();
 });
+
+tap.test('blacklist will not change the original message object', t => {
+  const logr = new Logr({
+    blacklist: 'spader',
+    reporters: {
+      test: {
+        reporter(options, tags, message) {
+          t.match(message.james, '1');
+          t.match(message.spader, 'xxxxxx');
+        },
+      }
+    }
+  });
+
+  const messageObject = {
+    james: '1',
+    spader: 'something secret'
+  };
+
+  logr.log(['debug'], messageObject);
+
+  t.equal(messageObject.spader, 'something secret');
+
+  t.end();
+});
