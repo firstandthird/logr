@@ -177,10 +177,7 @@ class Logger {
         tags.push('error');
       }
     }
-    // return serialized version without modifying the original object:
-    /// this does not work with errors
-    const obj = message instanceof Error ? message : Object.assign({}, message);
-    return serializeObject(obj, options);
+    return serializeObject(message, options);
   }
 
   log(tags, message, options) {
@@ -192,13 +189,14 @@ class Logger {
     if (this.config.defaultTags.length !== 0) {
       tags = this.config.defaultTags.concat(tags);
     }
-    message = typeof message === 'object' ? this.serialize(tags, message, this.config) : message;
+    message = this.serialize(tags, message, this.config);
+    // message = typeof message === 'object' ? this.serialize(tags, message, this.config) : message;
     Object.keys(this.reporters).forEach((name) => {
-      const localMessage = typeof message === 'object' ? Object.assign({}, message) : message;
+      const messageClone = typeof message === 'object' ? Object.assign({}, message) : message;
       try {
-        this.reporterLog(name, tags.slice(0), localMessage, options || {});
+        this.reporterLog(name, tags.slice(0), messageClone, options || {});
       } catch (e) {
-        console.log({ tags, message: localMessage }); //eslint-disable-line no-console
+        console.log({ tags, message: messageClone }); //eslint-disable-line no-console
         console.log(e); //eslint-disable-line no-console
       }
     });

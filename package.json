@@ -13,7 +13,7 @@
     "cov": "tap test/*.test.js --cov --coverage-report=lcov"
   },
   "dependencies": {
-    "@firstandthird/serialize-object": "^1.0.0",
+    "@firstandthird/serialize-object": "^1.1.0",
     "aug": "2.0.0",
     "lodash.intersection": "4.4.0"
   },
