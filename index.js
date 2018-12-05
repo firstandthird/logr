@@ -186,17 +186,17 @@ class Logger {
       message = tags;
       tags = [];
     }
+    message = this.serialize(tags, message, this.config);
     if (this.config.defaultTags.length !== 0) {
       tags = this.config.defaultTags.concat(tags);
     }
-    message = this.serialize(tags, message, this.config);
     // message = typeof message === 'object' ? this.serialize(tags, message, this.config) : message;
     Object.keys(this.reporters).forEach((name) => {
-      const messageClone = typeof message === 'object' ? Object.assign({}, message) : message;
+      const messageClone = (typeof message === 'object') ? Object.assign({}, message) : message;
       try {
         this.reporterLog(name, tags.slice(0), messageClone, options || {});
       } catch (e) {
-        console.log({ tags, message: messageClone }); //eslint-disable-line no-console
+        console.log({ tags, message }); //eslint-disable-line no-console
         console.log(e); //eslint-disable-line no-console
       }
     });
