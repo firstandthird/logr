@@ -192,9 +192,9 @@ class Logger {
     if (this.config.defaultTags.length !== 0) {
       tags = this.config.defaultTags.concat(tags);
     }
-    const serializedMsg = typeof message === 'object' ? this.serialize(tags, message, this.config) : message;
+    message = typeof message === 'object' ? this.serialize(tags, message, this.config) : message;
     Object.keys(this.reporters).forEach((name) => {
-      const localMessage = typeof serializedMsg === 'object' ? Object.assign({}, serializedMsg) : serializedMsg;
+      const localMessage = typeof message === 'object' ? Object.assign({}, message) : message;
       try {
         this.reporterLog(name, tags.slice(0), localMessage, options || {});
       } catch (e) {
