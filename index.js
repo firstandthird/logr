@@ -192,7 +192,7 @@ class Logger {
     }
     // message = typeof message === 'object' ? this.serialize(tags, message, this.config) : message;
     Object.keys(this.reporters).forEach((name) => {
-      const messageClone = (typeof message === 'object') ? Object.assign({}, message) : message;
+      const messageClone = (typeof message === 'object') ? aug(message) : message;
       try {
         this.reporterLog(name, tags.slice(0), messageClone, options || {});
       } catch (e) {
