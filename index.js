@@ -2,7 +2,8 @@
 
 const aug = require('aug');
 const intersection = require('lodash.intersection');
-const serializeInner = require('serialize-error');
+const serializeObject = require('@firstandthird/serialize-object');
+
 const defaults = {
   initLog: false,
   filter: [],
@@ -171,38 +172,12 @@ class Logger {
     if (options.addErrorTagToErrors === undefined) {
       options.addErrorTagToErrors = true;
     }
-    //if message is an error, turn it into a pretty object because Errors aren't json.stringifiable
     if (message instanceof Error) {
       if (tags.indexOf('error') < 0 && options.addErrorTagToErrors) {
         tags.push('error');
       }
-      // prettyify wreck response errors here:
-      if (message.data && message.data.isResponseError) {
-        const res = message.data.res;
-        message = {
-          message: `Response Error: ${res.statusCode}  ${res.statusMessage}`,
-          statusCode: res.statusCode,
-          payload: res.payload
-        };
-        return message;
-      }
-      // otherwise it's a normal error:
-      return serializeInner(message);
     }
-    if (typeof message === 'object' && !Array.isArray(message)) {
-      message = Object.assign({}, message);
-      // obscure any blacklisted tags:
-      const blacklistRegEx = new RegExp(options.blacklist, 'i'); // blacklist is case insensitive
-      Object.keys(message).forEach(key => {
-        if (key.match && key.match(blacklistRegEx) !== null) {
-          message[key] = 'xxxxxx';
-        }
-        if (typeof message[key] === 'object') {
-          message[key] = this.serialize(tags, message[key], Object.assign({}, options, { addErrorTagToErrors: false }));
-        }
-      });
-    }
-    return message;
+    return serializeObject(message, options);
   }
 
   log(tags, message, options) {
@@ -215,6 +190,7 @@ class Logger {
     if (this.config.defaultTags.length !== 0) {
       tags = this.config.defaultTags.concat(tags);
     }
+    // message = typeof message === 'object' ? this.serialize(tags, message, this.config) : message;
     Object.keys(this.reporters).forEach((name) => {
       const messageClone = (typeof message === 'object') ? aug(message) : message;
       try {
