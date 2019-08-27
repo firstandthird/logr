@@ -153,7 +153,10 @@ class Logger {
       reporterObj.reporter.defaults || {},
       reporterObj.options || {}
     );
-
+    // use async log if any reporter is async:
+    if (reporterObj.options.isAsync) {
+      this.log = this.asyncLog;
+    }
     //copy global filters into each reporter so only have to check one place
     //TODO switch to a lodash merge so dupes don't show up
     reporterObj.options.filter = reporterObj.options.filter.concat(this.config.filter);
@@ -180,6 +183,28 @@ class Logger {
     return serializeObject(message, options);
   }
 
+  async asyncLog(tags, message, options) {
+    //tags are optional
+    if (arguments.length === 1) {
+      message = tags;
+      tags = [];
+    }
+    message = this.serialize(tags, message, this.config);
+    if (this.config.defaultTags.length !== 0) {
+      tags = this.config.defaultTags.concat(tags);
+    }
+    // message = typeof message === 'object' ? this.serialize(tags, message, this.config) : message;
+    await Promise.all(Object.keys(this.reporters).map(async(name) => {
+      const messageClone = (typeof message === 'object') ? aug(message) : message;
+      try {
+        return this.reporterLog(name, tags.slice(0), messageClone, options || {});
+      } catch (e) {
+        console.log({ tags, message }); //eslint-disable-line no-console
+        console.log(e); //eslint-disable-line no-console
+      }
+    }));
+  }
+
   log(tags, message, options) {
     //tags are optional
     if (arguments.length === 1) {
@@ -191,7 +216,7 @@ class Logger {
       tags = this.config.defaultTags.concat(tags);
     }
     // message = typeof message === 'object' ? this.serialize(tags, message, this.config) : message;
-    Object.keys(this.reporters).forEach((name) => {
+    Object.keys(this.reporters).forEach(name => {
       const messageClone = (typeof message === 'object') ? aug(message) : message;
       try {
         this.reporterLog(name, tags.slice(0), messageClone, options || {});
@@ -202,7 +227,7 @@ class Logger {
     });
   }
 
-  reporterLog(reporterName, tags, message, additionalOptions) {
+  async reporterLog(reporterName, tags, message, additionalOptions) {
     const reporterObj = this.reporters[reporterName];
     if (additionalOptions && additionalOptions[reporterName]) {
       reporterObj.options = aug(reporterObj.options, additionalOptions[reporterName]);
@@ -233,7 +258,12 @@ class Logger {
       this.rateLimits[reporterName][tagKey] = curTime;
     }
     //pass in the options, tag and message to reporter
-    const out = reporterObj.reporter.log(reporterObj.options, tags, message);
+    let out;
+    if (options.isAsync) {
+      out = await reporterObj.reporter.log(reporterObj.options, tags, message);
+    } else {
+      out = reporterObj.reporter.log(reporterObj.options, tags, message);
+    }
 
     //check if anything meaningful was returned
     if (!out) {
