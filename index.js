@@ -253,17 +253,18 @@ class Logger {
     if (this.config.defaultTags.length !== 0) {
       tags = this.config.defaultTags.concat(tags);
     }
-    // message = typeof message === 'object' ? this.serialize(tags, message, this.config) : message;
-    await Promise.all(Object.keys(this.reporters).map(name => {
+    await Promise.all(Object.keys(this.reporters).map(name => new Promise(async resolve => {
       const messageClone = (typeof message === 'object') ? aug(message) : message;
+      // handle each reporter's async response/error and resolve the outer promise
+      // this way errors in one async reporter don't interfere with the other reporters
       try {
-        return this.reporterLog(name, tags.slice(0), messageClone, options || {});
+        resolve(await this.reporterLog(name, tags.slice(0), messageClone, options || {}));
       } catch (e) {
         console.log({ tags, message }); //eslint-disable-line no-console
         console.log(e); //eslint-disable-line no-console
+        resolve();
       }
-      return undefined;
-    }));
+    })));
   }
 
   reporterLog(reporterName, tags, message, additionalOptions) {

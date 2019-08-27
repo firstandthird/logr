@@ -328,3 +328,40 @@ test('reporter - async reporter returns', (t) => {
   };
   f();
 });
+
+test('reporter - async reporter errors', (t) => {
+  const t1 = new Date();
+  let totalRun = 0;
+  const logr = new Logr({
+    logger(msg) {
+      // t.equals(msg, 'hi');
+    },
+    reporters: {
+      test2(options, tag, messages) {
+        totalRun++;
+      },
+      test: {
+        reporter: {
+          defaults: {
+            test: true,
+            isAsync: true
+          },
+          async log(options, tags, message) {
+            const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+            await wait(500);
+            totalRun++;
+            throw new Error('async error!');
+          }
+        }
+      }
+    }
+  });
+  const f = async () => {
+    await logr.log('hi');
+    t.equal(totalRun, 2, 'all reporters end before moving on');
+    const elapsed = new Date().getTime() - t1.getTime();
+    t.ok(elapsed > 500);
+    t.end();
+  };
+  f();
+});
