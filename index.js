@@ -194,7 +194,7 @@ class Logger {
       tags = this.config.defaultTags.concat(tags);
     }
     // message = typeof message === 'object' ? this.serialize(tags, message, this.config) : message;
-    await Promise.all(Object.keys(this.reporters).map(async(name) => {
+    await Promise.all(Object.keys(this.reporters).map(name => {
       const messageClone = (typeof message === 'object') ? aug(message) : message;
       try {
         return this.reporterLog(name, tags.slice(0), messageClone, options || {});
@@ -202,6 +202,7 @@ class Logger {
         console.log({ tags, message }); //eslint-disable-line no-console
         console.log(e); //eslint-disable-line no-console
       }
+      return undefined;
     }));
   }
 
