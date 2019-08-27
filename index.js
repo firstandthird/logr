@@ -153,9 +153,10 @@ class Logger {
       reporterObj.reporter.defaults || {},
       reporterObj.options || {}
     );
-    // use async log if any reporter is async:
+    // use async log if any reporter is async
     if (reporterObj.options.isAsync) {
       this.log = this.asyncLog;
+      this.reporterLog = this.asyncReporterLog;
     }
     //copy global filters into each reporter so only have to check one place
     //TODO switch to a lodash merge so dupes don't show up
@@ -183,27 +184,40 @@ class Logger {
     return serializeObject(message, options);
   }
 
-  async asyncLog(tags, message, options) {
-    //tags are optional
-    if (arguments.length === 1) {
-      message = tags;
-      tags = [];
+  reporterShouldLog(reporterName, tags, options) {
+    //reporters can be disabled on the option level
+    if (options.enabled === false) {
+      return;
     }
-    message = this.serialize(tags, message, this.config);
-    if (this.config.defaultTags.length !== 0) {
-      tags = this.config.defaultTags.concat(tags);
+    //if there are filters and it doesn't match, stop here
+    if (options.filter.length !== 0 && intersection(options.filter, tags).length === 0) {
+      return;
     }
-    // message = typeof message === 'object' ? this.serialize(tags, message, this.config) : message;
-    await Promise.all(Object.keys(this.reporters).map(name => {
-      const messageClone = (typeof message === 'object') ? aug(message) : message;
-      try {
-        return this.reporterLog(name, tags.slice(0), messageClone, options || {});
-      } catch (e) {
-        console.log({ tags, message }); //eslint-disable-line no-console
-        console.log(e); //eslint-disable-line no-console
+    //if there are excludes and they match, stop here
+    if (options.exclude.length !== 0 && intersection(options.exclude, tags).length > 0) {
+      return;
+    }
+    // if throttling was specified then throttle log rate:
+    if (options.throttle) {
+      const tagKey = options.throttleBasedOnTags ? tags.join('') : 'all';
+      const curTime = new Date().getTime();
+      if (this.rateLimits[reporterName][tagKey]) {
+        if (curTime - this.rateLimits[reporterName][tagKey] < options.throttle) {
+          return;
+        }
       }
-      return undefined;
-    }));
+      this.rateLimits[reporterName][tagKey] = curTime;
+    }
+    return true;
+  }
+
+  getReporter(reporterName, additionalOptions) {
+    const reporterObj = this.reporters[reporterName];
+    if (additionalOptions && additionalOptions[reporterName]) {
+      reporterObj.options = aug(reporterObj.options, additionalOptions[reporterName]);
+    }
+    const options = reporterObj.options;
+    return { reporterObj, options };
   }
 
   log(tags, message, options) {
@@ -228,50 +242,58 @@ class Logger {
     });
   }
 
-  async reporterLog(reporterName, tags, message, additionalOptions) {
-    const reporterObj = this.reporters[reporterName];
-    if (additionalOptions && additionalOptions[reporterName]) {
-      reporterObj.options = aug(reporterObj.options, additionalOptions[reporterName]);
+  // used when one or more reporters isAsync:
+  async asyncLog(tags, message, options) {
+    //tags are optional
+    if (arguments.length === 1) {
+      message = tags;
+      tags = [];
     }
-    const options = reporterObj.options;
-
-    //reporters can be disabled on the option level
-    if (options.enabled === false) {
-      return;
+    message = this.serialize(tags, message, this.config);
+    if (this.config.defaultTags.length !== 0) {
+      tags = this.config.defaultTags.concat(tags);
     }
-    //if there are filters and it doesn't match, stop here
-    if (options.filter.length !== 0 && intersection(options.filter, tags).length === 0) {
-      return;
-    }
-    //if there are excludes and they match, stop here
-    if (options.exclude.length !== 0 && intersection(options.exclude, tags).length > 0) {
-      return;
-    }
-    // if throttling was specified then throttle log rate:
-    if (options.throttle) {
-      const tagKey = options.throttleBasedOnTags ? tags.join('') : 'all';
-      const curTime = new Date().getTime();
-      if (this.rateLimits[reporterName][tagKey]) {
-        if (curTime - this.rateLimits[reporterName][tagKey] < options.throttle) {
-          return;
-        }
+    // message = typeof message === 'object' ? this.serialize(tags, message, this.config) : message;
+    await Promise.all(Object.keys(this.reporters).map(name => {
+      const messageClone = (typeof message === 'object') ? aug(message) : message;
+      try {
+        return this.reporterLog(name, tags.slice(0), messageClone, options || {});
+      } catch (e) {
+        console.log({ tags, message }); //eslint-disable-line no-console
+        console.log(e); //eslint-disable-line no-console
       }
-      this.rateLimits[reporterName][tagKey] = curTime;
-    }
-    //pass in the options, tag and message to reporter
-    let out;
-    if (options.isAsync) {
-      out = await reporterObj.reporter.log(reporterObj.options, tags, message);
-    } else {
-      out = reporterObj.reporter.log(reporterObj.options, tags, message);
-    }
+      return undefined;
+    }));
+  }
 
-    //check if anything meaningful was returned
-    if (!out) {
-      return;
+  reporterLog(reporterName, tags, message, additionalOptions) {
+    const { reporterObj, options } = this.getReporter(reporterName, additionalOptions);
+    if (this.reporterShouldLog(reporterName, tags, options)) {
+      const out = reporterObj.reporter.log(reporterObj.options, tags, message);
+      if (!out) {
+        return;
+      }
+      //pass ouput string to logger
+      this.logger(out);
     }
-    //pass ouput string to logger
-    this.logger(out);
+  }
+
+  // used when one or more reporters isAsync:
+  async asyncReporterLog(reporterName, tags, message, additionalOptions) {
+    const { reporterObj, options } = this.getReporter(reporterName, additionalOptions);
+    if (this.reporterShouldLog(reporterName, tags, options)) {
+      let out;
+      if (options.isAsync) {
+        out = await reporterObj.reporter.log(reporterObj.options, tags, message);
+      } else {
+        out = reporterObj.reporter.log(reporterObj.options, tags, message);
+      }
+      if (!out) {
+        return;
+      }
+      //pass ouput string to logger
+      this.logger(out);
+    }
   }
 
   logger(msg) {
