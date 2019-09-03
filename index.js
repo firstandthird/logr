@@ -180,7 +180,7 @@ class Logger {
     return serializeObject(message, options);
   }
 
-  log(tags, message, options) {
+  async log(tags, message, options) {
     //tags are optional
     if (arguments.length === 1) {
       message = tags;
@@ -191,18 +191,19 @@ class Logger {
       tags = this.config.defaultTags.concat(tags);
     }
     // message = typeof message === 'object' ? this.serialize(tags, message, this.config) : message;
-    Object.keys(this.reporters).forEach((name) => {
+    // Object.keys(this.reporters).forEach(async(name) => {
+    await Promise.all(Object.keys(this.reporters).map(async name => {
       const messageClone = (typeof message === 'object') ? aug(message) : message;
       try {
-        this.reporterLog(name, tags.slice(0), messageClone, options || {});
+        await this.reporterLog(name, tags.slice(0), messageClone, options || {});
       } catch (e) {
         console.log({ tags, message }); //eslint-disable-line no-console
         console.log(e); //eslint-disable-line no-console
       }
-    });
+    }));
   }
 
-  reporterLog(reporterName, tags, message, additionalOptions) {
+  async reporterLog(reporterName, tags, message, additionalOptions) {
     const reporterObj = this.reporters[reporterName];
     if (additionalOptions && additionalOptions[reporterName]) {
       reporterObj.options = aug(reporterObj.options, additionalOptions[reporterName]);
@@ -233,7 +234,12 @@ class Logger {
       this.rateLimits[reporterName][tagKey] = curTime;
     }
     //pass in the options, tag and message to reporter
-    const out = reporterObj.reporter.log(reporterObj.options, tags, message);
+    let out;
+    if (options.isAsync) {
+      out = await reporterObj.reporter.log(reporterObj.options, tags, message);
+    } else {
+      out = reporterObj.reporter.log(reporterObj.options, tags, message);
+    }
 
     //check if anything meaningful was returned
     if (!out) {
