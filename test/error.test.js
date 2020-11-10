@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 const tap = require('tap');
 const Logr = require('../');
-const wreck = require('wreck');
-const Hapi = require('hapi');
+const wreck = require('@hapi/wreck');
+const Hapi = require('@hapi/hapi');
 
 tap.runOnly = true;
 
