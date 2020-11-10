@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-'use strict';
 const tap = require('tap');
 const test = tap.test;
 const Logr = require('../');

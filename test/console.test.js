@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-'use strict';
 const test = require('tap').test;
 
 const consoleReporter = require('../lib/console');
