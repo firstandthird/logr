@@ -297,3 +297,24 @@ tap.test('blacklist will not change the original message object', t => {
 
   t.end();
 });
+
+tap.test('log - support async reporters', async(t) => {
+  const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+  let called = false;
+  const logr = new Logr({
+    reporters: {
+      test: {
+        reporter: async(options, tags, message) => {
+          await wait(2000);
+          called = true;
+        },
+        options: {
+          isAsync: true
+        }
+      },
+    }
+  });
+  await logr.log(['debug'], 'test');
+  t.ok(called);
+  t.end();
+});
