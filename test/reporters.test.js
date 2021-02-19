@@ -290,3 +290,77 @@ test('log - initLog', (t) => {
   t.equal(vals[0], '[logr,init] {"message":"Logr initialized","enabledReporters":"test,test2","testFilter":[],"test2Filter":["hapi"]}');
   t.end();
 });
+
+test('reporter - async reporter returns', (t) => {
+  const t1 = new Date();
+  let totalRun = 0;
+  const logr = new Logr({
+    logger(msg) {
+      t.equals(msg, 'hi');
+    },
+    reporters: {
+      test2(options, tag, messages) {
+        totalRun++;
+      },
+      test: {
+        reporter: {
+          defaults: {
+            test: true,
+            isAsync: true
+          },
+          async log(options, tags, message) {
+            const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+            await wait(500);
+            totalRun++;
+            return message;
+          }
+        }
+      }
+    }
+  });
+  const f = async () => {
+    await logr.log('hi');
+    t.equal(totalRun, 2, 'all reporters end before moving on');
+    const elapsed = new Date().getTime() - t1.getTime();
+    t.ok(elapsed > 500);
+    t.end();
+  };
+  f();
+});
+
+test('reporter - async reporter errors', (t) => {
+  const t1 = new Date();
+  let totalRun = 0;
+  const logr = new Logr({
+    logger(msg) {
+      // t.equals(msg, 'hi');
+    },
+    reporters: {
+      test2(options, tag, messages) {
+        totalRun++;
+      },
+      test: {
+        reporter: {
+          defaults: {
+            test: true,
+            isAsync: true
+          },
+          async log(options, tags, message) {
+            const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+            await wait(500);
+            totalRun++;
+            throw new Error('async error!');
+          }
+        }
+      }
+    }
+  });
+  const f = async () => {
+    await logr.log('hi');
+    t.equal(totalRun, 2, 'all reporters end before moving on');
+    const elapsed = new Date().getTime() - t1.getTime();
+    t.ok(elapsed > 500);
+    t.end();
+  };
+  f();
+});

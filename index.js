@@ -153,7 +153,11 @@ class Logger {
       reporterObj.reporter.defaults || {},
       reporterObj.options || {}
     );
-
+    // use async log if any reporter is async
+    if (reporterObj.options.isAsync) {
+      this.log = this.asyncLog;
+      this.reporterLog = this.asyncReporterLog;
+    }
     //copy global filters into each reporter so only have to check one place
     //TODO switch to a lodash merge so dupes don't show up
     reporterObj.options.filter = reporterObj.options.filter.concat(this.config.filter);
@@ -180,35 +184,7 @@ class Logger {
     return serializeObject(message, options);
   }
 
-  log(tags, message, options) {
-    //tags are optional
-    if (arguments.length === 1) {
-      message = tags;
-      tags = [];
-    }
-    message = this.serialize(tags, message, this.config);
-    if (this.config.defaultTags.length !== 0) {
-      tags = this.config.defaultTags.concat(tags);
-    }
-    // message = typeof message === 'object' ? this.serialize(tags, message, this.config) : message;
-    Object.keys(this.reporters).forEach((name) => {
-      const messageClone = (typeof message === 'object') ? aug(message) : message;
-      try {
-        this.reporterLog(name, tags.slice(0), messageClone, options || {});
-      } catch (e) {
-        console.log({ tags, message }); //eslint-disable-line no-console
-        console.log(e); //eslint-disable-line no-console
-      }
-    });
-  }
-
-  reporterLog(reporterName, tags, message, additionalOptions) {
-    const reporterObj = this.reporters[reporterName];
-    if (additionalOptions && additionalOptions[reporterName]) {
-      reporterObj.options = aug(reporterObj.options, additionalOptions[reporterName]);
-    }
-    const options = reporterObj.options;
-
+  reporterShouldLog(reporterName, tags, options) {
     //reporters can be disabled on the option level
     if (options.enabled === false) {
       return;
@@ -232,15 +208,93 @@ class Logger {
       }
       this.rateLimits[reporterName][tagKey] = curTime;
     }
-    //pass in the options, tag and message to reporter
-    const out = reporterObj.reporter.log(reporterObj.options, tags, message);
+    return true;
+  }
 
-    //check if anything meaningful was returned
-    if (!out) {
-      return;
+  getReporter(reporterName, additionalOptions) {
+    const reporterObj = this.reporters[reporterName];
+    if (additionalOptions && additionalOptions[reporterName]) {
+      reporterObj.options = aug(reporterObj.options, additionalOptions[reporterName]);
     }
-    //pass ouput string to logger
-    this.logger(out);
+    const options = reporterObj.options;
+    return { reporterObj, options };
+  }
+
+  log(tags, message, options) {
+    //tags are optional
+    if (arguments.length === 1) {
+      message = tags;
+      tags = [];
+    }
+    message = this.serialize(tags, message, this.config);
+    if (this.config.defaultTags.length !== 0) {
+      tags = this.config.defaultTags.concat(tags);
+    }
+    // message = typeof message === 'object' ? this.serialize(tags, message, this.config) : message;
+    Object.keys(this.reporters).forEach(name => {
+      const messageClone = (typeof message === 'object') ? aug(message) : message;
+      try {
+        this.reporterLog(name, tags.slice(0), messageClone, options || {});
+      } catch (e) {
+        console.log({ tags, message }); //eslint-disable-line no-console
+        console.log(e); //eslint-disable-line no-console
+      }
+    });
+  }
+
+  // used when one or more reporters isAsync:
+  async asyncLog(tags, message, options) {
+    //tags are optional
+    if (arguments.length === 1) {
+      message = tags;
+      tags = [];
+    }
+    message = this.serialize(tags, message, this.config);
+    if (this.config.defaultTags.length !== 0) {
+      tags = this.config.defaultTags.concat(tags);
+    }
+    await Promise.all(Object.keys(this.reporters).map(name => new Promise(async resolve => {
+      const messageClone = (typeof message === 'object') ? aug(message) : message;
+      // handle each reporter's async response/error and resolve the outer promise
+      // this way errors in one async reporter don't interfere with the other reporters
+      try {
+        resolve(await this.reporterLog(name, tags.slice(0), messageClone, options || {}));
+      } catch (e) {
+        console.log({ tags, message }); //eslint-disable-line no-console
+        console.log(e); //eslint-disable-line no-console
+        resolve();
+      }
+    })));
+  }
+
+  reporterLog(reporterName, tags, message, additionalOptions) {
+    const { reporterObj, options } = this.getReporter(reporterName, additionalOptions);
+    if (this.reporterShouldLog(reporterName, tags, options)) {
+      const out = reporterObj.reporter.log(reporterObj.options, tags, message);
+      if (!out) {
+        return;
+      }
+      //pass ouput string to logger
+      this.logger(out);
+    }
+  }
+
+  // used when one or more reporters isAsync:
+  async asyncReporterLog(reporterName, tags, message, additionalOptions) {
+    const { reporterObj, options } = this.getReporter(reporterName, additionalOptions);
+    if (this.reporterShouldLog(reporterName, tags, options)) {
+      let out;
+      if (options.isAsync) {
+        out = await reporterObj.reporter.log(reporterObj.options, tags, message);
+      } else {
+        out = reporterObj.reporter.log(reporterObj.options, tags, message);
+      }
+      if (!out) {
+        return;
+      }
+      //pass ouput string to logger
+      this.logger(out);
+    }
   }
 
   logger(msg) {
